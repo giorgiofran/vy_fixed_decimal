@@ -1,10 +1,8 @@
-/// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
-
 part of fixed_decimal.fixed_decimal;
 
 class Money implements Comparable<Money> {
-  FixedDecimal _fixed;
-  String _countryLocale;
+  late FixedDecimal _fixed;
+  late String _countryLocale;
 
   Decimal get decimal => _fixed.decimal;
   Decimal get minimumValue => _fixed.minimumValue;
@@ -13,38 +11,40 @@ class Money implements Comparable<Money> {
   RoundingType get rounding => _fixed.rounding;
   String get countryLocale => _countryLocale;
 
-  Money.fromDecimal(Decimal decimal, String userLocale,
-      {RoundingType rounding, String countryLocale}) {
-    _countryLocale = countryLocale ?? userLocale;
-    Decimal minimumValue;
+  Money.fromDecimal(Decimal decimal, String countryLocale,
+      /* String userLocale, */
+      {RoundingType? rounding}) {
+    _countryLocale = countryLocale /* ?? userLocale */;
 
-    minimumValue = DecimalExtension.minimumValueFromScale(
-        _getScaleFromPattern(userLocale));
+    var minimumValue = DecimalExtension.minimumValueFromScale(
+        _getScaleFromPattern(countryLocale));
     _fixed = FixedDecimal._fromDecimal(decimal,
-        userLocale: userLocale,
+        //userLocale: userLocale,
         minimumValue: minimumValue,
         rounding: rounding ?? RoundingType.halfAwayFromZero,
         policy: ScalingPolicy.thisOrNothing);
+    _fixed.userLocale = _countryLocale;
   }
 
-  static Money parse(String value, String userLocale,
-      {RoundingType rounding, String countryLocale}) {
-    final m = Money.fromDecimal(Decimal.zero, userLocale,
-        rounding: rounding, countryLocale: countryLocale ?? userLocale);
+  static Money parse(String value, String countryLocale,
+      {RoundingType? rounding, String? userLocale}) {
+    final m =
+        Money.fromDecimal(Decimal.zero, countryLocale, rounding: rounding);
     return m.parseFormattedCurrency(value,
-        userLocale: userLocale, countryLocale: countryLocale ?? userLocale);
+        userLocale: userLocale ?? countryLocale, countryLocale: countryLocale);
   }
 
-  static Money fromFixedDecimal(FixedDecimal fixedDecimal, String userLocale,
-      {String symbol, String countryLocale}) {
-    countryLocale ??= userLocale;
-    userLocale ??= fixedDecimal._userLocale;
-    return Money.fromDecimal(fixedDecimal._decimal, userLocale,
-        rounding: fixedDecimal._rounding, countryLocale: countryLocale);
+  static Money fromFixedDecimal(FixedDecimal fixedDecimal, String countryLocale,
+      {String? userLocale, String? symbol}) {
+    if (userLocale != null) {
+      fixedDecimal.userLocale = userLocale;
+    }
+    return Money.fromDecimal(fixedDecimal._decimal, countryLocale,
+        rounding: fixedDecimal._rounding);
   }
 
-  static int _getScaleFromPattern(String userLocale) {
-    final currency = NumberFormat.currency(locale: userLocale);
+  static int _getScaleFromPattern(String countryLocale) {
+    final currency = NumberFormat.currency(locale: countryLocale);
     return currency.maximumFractionDigits;
   }
 
@@ -67,7 +67,7 @@ class Money implements Comparable<Money> {
   bool isEven() => _fixed.isEven;
 
   Money roundToNearestMultiple(
-      {Object minimumValue, int scale, RoundingType rounding}) {
+      {Object? minimumValue, int? scale, RoundingType? rounding}) {
     if (scale == null) {
       minimumValue ??= minimumValue;
     }
@@ -109,7 +109,7 @@ class Money implements Comparable<Money> {
   @override
   int compareTo(Money other) => decimal.compareTo(other.decimal);
 
-  Money duplicate() => Money.fromDecimal(decimal, userLocale);
+  Money duplicate() => Money.fromDecimal(decimal, _countryLocale);
 
   static int _int_min(int first, int second) => first < second ? first : second;
 
@@ -142,39 +142,32 @@ class Money implements Comparable<Money> {
   /// from the first addend. If it is needed to change them use the add method.
   Money operator +(Money other) => addition(this, other, userLocale);
 
-  Money add(Object addendObj, {Decimal minimumValue, RoundingType rounding}) {
+  Money add(Object addendObj, {Decimal? minimumValue, RoundingType? rounding}) {
     return addition(this, addendObj, userLocale,
         minimumValue: minimumValue, rounding: rounding);
   }
 
-  static Money addition(Object augendObj, Object addendObj, String UserLocale,
-      {Decimal minimumValue, RoundingType rounding}) {
+  static Money addition(
+      Object augendObj, Object addendObj, String countryLocale,
+      {Decimal? minimumValue, RoundingType? rounding}) {
     final augend = DecimalExtension.decimalFromObject(augendObj);
-    if (augend == null) {
-      return null;
-    }
     if (augend.isNaN || augend.isInfinite) {
-      return Money.fromDecimal(augend, UserLocale);
+      return Money.fromDecimal(augend, countryLocale);
     }
     final addend = DecimalExtension.decimalFromObject(addendObj);
-    if (addend == null) {
-      return null;
-    }
     if (addend.isNaN || addend.isInfinite) {
-      return Money.fromDecimal(addend, UserLocale);
+      return Money.fromDecimal(addend, countryLocale);
     }
 
     Decimal _defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
-      Decimal augendMin, addendMin;
+      Decimal? augendMin, addendMin;
       if (augendObj is Money) {
         augendMin = augendObj.minimumValue;
       } else if (augendObj is FixedDecimal) {
-        {
-          augendMin = augendObj.minimumValue;
-        }
+        augendMin = augendObj.minimumValue;
       }
       if (addendObj is Money) {
         addendMin = addendObj.minimumValue;
@@ -185,7 +178,7 @@ class Money implements Comparable<Money> {
       if (augendMin == null) {
         if (addendMin == null) {
           return DecimalExtension.minimumValueFromScale(
-              _int_min((augend + addend).scale, 10));
+              min<int>((augend + addend).scale, 10));
         }
         return addendMin;
       } else {
@@ -206,7 +199,7 @@ class Money implements Comparable<Money> {
             _defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
-        UserLocale);
+        countryLocale);
   }
 
   /// Subtraction operator.
@@ -216,34 +209,30 @@ class Money implements Comparable<Money> {
   Money operator -(Money other) => subtraction(this, other, userLocale);
 
   Money subtract(Object subtrahendObj,
-      {Decimal minimumValue, RoundingType rounding}) {
+      {Decimal? minimumValue, RoundingType? rounding}) {
     return subtraction(this, subtrahendObj, userLocale,
         minimumValue: minimumValue, rounding: rounding);
   }
 
   static Money subtraction(
-      Object minuendObj, Object subtrahendObj, String userLocale,
-      {Decimal minimumValue, RoundingType rounding}) {
+      Object minuendObj, Object subtrahendObj, String countryLocale,
+      {Decimal? minimumValue, RoundingType? rounding}) {
     final minuend = DecimalExtension.decimalFromObject(minuendObj);
-    if (minuend == null) {
-      return null;
-    }
+
     if (minuend.isNaN || minuend.isInfinite) {
-      return Money.fromDecimal(minuend, userLocale);
+      return Money.fromDecimal(minuend, countryLocale);
     }
     final subtrahend = DecimalExtension.decimalFromObject(subtrahendObj);
-    if (subtrahend == null) {
-      return null;
-    }
+
     if (subtrahend.isNaN || subtrahend.isInfinite) {
-      return Money.fromDecimal(subtrahend, userLocale);
+      return Money.fromDecimal(subtrahend, countryLocale);
     }
 
     Decimal _defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
-      Decimal minuendMin, subtrahendMin;
+      Decimal? minuendMin, subtrahendMin;
       if (minuendObj is Money) {
         minuendMin = minuendObj.minimumValue;
       } else if (minuendObj is FixedDecimal) {
@@ -283,41 +272,37 @@ class Money implements Comparable<Money> {
             _defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
-        userLocale);
+        countryLocale);
   }
 
   /// Multiplication operator.
   Money operator *(Money other) => multiplication(this, other, userLocale);
 
   Money multiply(Object multiplierObj,
-      {Decimal minimumValue, RoundingType rounding}) {
+      {Decimal? minimumValue, RoundingType? rounding}) {
     return multiplication(this, multiplierObj, userLocale,
         minimumValue: minimumValue, rounding: rounding);
   }
 
   static Money multiplication(
-      Object multiplicandObj, Object multiplierObj, String userLocale,
-      {Decimal minimumValue, RoundingType rounding}) {
+      Object multiplicandObj, Object multiplierObj, String countryLocale,
+      {Decimal? minimumValue, RoundingType? rounding}) {
     final multiplicand = DecimalExtension.decimalFromObject(multiplicandObj);
-    if (multiplicand == null) {
-      return null;
-    }
+
     if (multiplicand.isNaN || multiplicand.isInfinite) {
-      return Money.fromDecimal(multiplicand, userLocale);
+      return Money.fromDecimal(multiplicand, countryLocale);
     }
     final multiplier = DecimalExtension.decimalFromObject(multiplierObj);
-    if (multiplier == null) {
-      return null;
-    }
+
     if (multiplier.isNaN || multiplier.isInfinite) {
-      return Money.fromDecimal(multiplier, userLocale);
+      return Money.fromDecimal(multiplier, countryLocale);
     }
 
     Decimal _defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
-      Decimal multiplicandMin, multiplierMin;
+      Decimal? multiplicandMin, multiplierMin;
       if (multiplicandObj is Money) {
         multiplicandMin = multiplicandObj.minimumValue;
       } else if (multiplicandObj is FixedDecimal) {
@@ -355,7 +340,7 @@ class Money implements Comparable<Money> {
             _defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
-        userLocale);
+        countryLocale);
   }
 
   static Decimal _mod(Decimal dividend, Decimal divisor) {
@@ -370,34 +355,30 @@ class Money implements Comparable<Money> {
   Money operator %(Money other) => modulusDivision(this, other, userLocale);
 
   Money modulo(Object divisorObj,
-      {Decimal minimumValue, RoundingType rounding}) {
+      {Decimal? minimumValue, RoundingType? rounding}) {
     return modulusDivision(this, divisorObj, userLocale,
         minimumValue: minimumValue, rounding: rounding);
   }
 
   static Money modulusDivision(
-      Object dividendObj, Object divisorObj, String userLocale,
-      {Decimal minimumValue, RoundingType rounding}) {
+      Object dividendObj, Object divisorObj, String countryLocale,
+      {Decimal? minimumValue, RoundingType? rounding}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
-    if (dividend == null) {
-      return null;
-    }
+
     if (dividend.isNaN || dividend.isInfinite) {
-      return Money.fromDecimal(dividend, userLocale);
+      return Money.fromDecimal(dividend, countryLocale);
     }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-    if (divisor == null) {
-      return null;
-    }
+
     if (divisor.isNaN || divisor.isInfinite) {
-      return Money.fromDecimal(divisor, userLocale);
+      return Money.fromDecimal(divisor, countryLocale);
     }
 
     Decimal _defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
-      Decimal dividendMin, divisorMin;
+      Decimal? dividendMin, divisorMin;
       if (dividendObj is Money) {
         dividendMin = dividendObj.minimumValue;
       } else if (dividendObj is FixedDecimal) {
@@ -433,41 +414,37 @@ class Money implements Comparable<Money> {
             _defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
-        userLocale);
+        countryLocale);
   }
 
   /// Division operator.
   Money operator /(Money other) => division(this, other, userLocale);
 
   Money divide(Object divisorObj,
-      {Decimal minimumValue, RoundingType rounding}) {
+      {Decimal? minimumValue, RoundingType? rounding}) {
     return division(this, divisorObj, userLocale,
         minimumValue: minimumValue, rounding: rounding);
   }
 
   static Money division(
-      Object dividendObj, Object divisorObj, String userLocale,
-      {Decimal minimumValue, RoundingType rounding}) {
+      Object dividendObj, Object divisorObj, String countryLocale,
+      {Decimal? minimumValue, RoundingType? rounding}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
-    if (dividend == null) {
-      return null;
-    }
+
     if (dividend.isNaN || dividend.isInfinite) {
-      return Money.fromDecimal(dividend, userLocale);
+      return Money.fromDecimal(dividend, countryLocale);
     }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-    if (divisor == null) {
-      return null;
-    }
+
     if (divisor.isNaN || divisor.isInfinite) {
-      return Money.fromDecimal(divisor, userLocale);
+      return Money.fromDecimal(divisor, countryLocale);
     }
 
     Decimal _defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
-      Decimal dividendMin, divisorMin;
+      Decimal? dividendMin, divisorMin;
       if (dividendObj is Money) {
         dividendMin = dividendObj.minimumValue;
       } else if (dividendObj is FixedDecimal) {
@@ -503,7 +480,7 @@ class Money implements Comparable<Money> {
             _defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
-        userLocale);
+        countryLocale);
   }
 
   /// Truncating division operator.
@@ -513,27 +490,23 @@ class Money implements Comparable<Money> {
   Money operator ~/(Money other) => integerDivision(this, other, userLocale);
 
   Money divideAsInteger(Object divisorObj,
-      {Decimal minimumValue, RoundingType rounding}) {
+      {Decimal? minimumValue, RoundingType? rounding}) {
     return integerDivision(this, divisorObj, userLocale,
         minimumValue: minimumValue, rounding: rounding);
   }
 
   static Money integerDivision(
-      Object dividendObj, Object divisorObj, String userLocale,
-      {Decimal minimumValue, RoundingType rounding}) {
+      Object dividendObj, Object divisorObj, String countryLocale,
+      {Decimal? minimumValue, RoundingType? rounding}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
-    if (dividend == null) {
-      return null;
-    }
+
     if (dividend.isNaN || dividend.isInfinite) {
-      return Money.fromDecimal(dividend, userLocale);
+      return Money.fromDecimal(dividend, countryLocale);
     }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-    if (divisor == null) {
-      return null;
-    }
+
     if (divisor.isNaN || divisor.isInfinite) {
-      return Money.fromDecimal(divisor, userLocale);
+      return Money.fromDecimal(divisor, countryLocale);
     }
 
     Decimal _defineMinimumValue() {
@@ -551,7 +524,7 @@ class Money implements Comparable<Money> {
             _defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
-        userLocale);
+        countryLocale);
   }
 
   /// Negate operator.
@@ -683,7 +656,7 @@ class Money implements Comparable<Money> {
 
   /// Converts a [num] to a string in decimal exponential notation with
   /// [fractionDigits] digits after the decimal point.
-  String toStringAsExponential([int fractionDigits]) =>
+  String toStringAsExponential([int? fractionDigits]) =>
       decimal.toStringAsExponential(fractionDigits);
 
   /// Converts a [num] to a string representation with [precision]
@@ -695,13 +668,13 @@ class Money implements Comparable<Money> {
   String toString() => formattedCurrency(userLocale: userLocale);
 
   String formattedValue(
-      {String userLocale,
-      bool optimizedFraction,
-      bool turnOffGrouping,
-      bool isAccounting}) {
-    userLocale ??= this.userLocale ?? _countryLocale;
+      {String? userLocale,
+      bool? optimizedFraction,
+      bool? turnOffGrouping,
+      bool? isAccounting}) {
+    userLocale ??= this.userLocale /* ?? _countryLocale */;
     turnOffGrouping ??= false;
-    final mf = MoneyFormatter(userLocale, countryLocale: _countryLocale);
+    final mf = MoneyFormatter(_countryLocale, userLocale: userLocale);
     return mf.formatMoney(this,
         showGroups: !turnOffGrouping,
         implicitSymbol: true,
@@ -710,14 +683,14 @@ class Money implements Comparable<Money> {
   }
 
   String formattedCompactCurrency(
-      {String userLocale,
-      String symbol,
-      bool optimizedFraction,
-      bool turnOffGrouping,
-      bool isAccounting}) {
-    userLocale ??= this.userLocale ?? _countryLocale;
+      {String? userLocale,
+      String? symbol,
+      bool? optimizedFraction,
+      bool? turnOffGrouping,
+      bool? isAccounting}) {
+    userLocale ??= this.userLocale /*  ?? _countryLocale */;
     turnOffGrouping ??= false;
-    final mf = MoneyFormatter(userLocale, countryLocale: _countryLocale);
+    final mf = MoneyFormatter(_countryLocale, userLocale: userLocale);
     return mf.formatMoney(this,
         showGroups: !turnOffGrouping,
         compactCurrencySymbol: true,
@@ -727,17 +700,17 @@ class Money implements Comparable<Money> {
   }
 
   String formattedCurrency(
-      {String userLocale,
-      String symbol,
-      bool optimizedFraction,
-      bool turnOffGrouping,
-      bool isAccounting}) {
+      {String? userLocale,
+      String? symbol,
+      bool? optimizedFraction,
+      bool? turnOffGrouping,
+      bool? isAccounting}) {
     if (!isValid()) {
       return 'Invalid Money';
     }
-    userLocale ??= this.userLocale ?? _countryLocale;
+    userLocale ??= /*this.userLocale  ??*/ _countryLocale;
     turnOffGrouping ??= false;
-    final mf = MoneyFormatter(userLocale, countryLocale: _countryLocale);
+    final mf = MoneyFormatter(_countryLocale, userLocale: userLocale);
     return mf.formatMoney(this,
         showGroups: !turnOffGrouping,
         compactCurrencySymbol: false,
@@ -747,14 +720,12 @@ class Money implements Comparable<Money> {
   }
 
   Money parseFormattedCurrency(String value,
-      {String userLocale, String countryLocale}) {
-    userLocale ??= this.userLocale ?? _countryLocale;
+      {String? userLocale, String? countryLocale}) {
+    userLocale ??= this.userLocale /* ?? _countryLocale */;
     countryLocale ??= _countryLocale;
-    final mf = MoneyFormatter(userLocale, countryLocale: countryLocale);
+    final mf = MoneyFormatter(countryLocale, userLocale: userLocale);
     return mf.parse(value, rounding: rounding);
   }
 
-  bool isValid() {
-    return decimal != null && _countryLocale != null;
-  }
+  bool isValid() => true /* decimal != null && _countryLocale != null */;
 }

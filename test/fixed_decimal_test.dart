@@ -5,10 +5,10 @@ import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 
 FixedDecimal fixed(String value,
-        {Decimal minimumValue,
-        int scale,
-        RoundingType rounding,
-        ScalingPolicy policy}) =>
+        {Decimal? minimumValue,
+        int? scale,
+        RoundingType? rounding,
+        ScalingPolicy? policy}) =>
     FixedDecimal.parse(value,
         minimumValue: minimumValue,
         scale: scale,
@@ -311,9 +311,12 @@ void main() {
       expect((fixed('1') / fixed('3')).scale, equals(0));
     });
     test('toStringAsFixed(int fractionDigits)', () {
+     /*  expect(fixed(('2.5'), scale: 0).toStringAsFixed(0),
+          equals((2.5).toStringAsFixed(0))); */
       [0, 1, 23, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((num n) {
         [0, 1, 5, 10].forEach((p) {
-          expect(fixed(n.toString(), scale: p).toStringAsFixed(p),
+          print('n: $n, p: $p');
+          expect(fixed(n.toString(), scale: p, rounding: RoundingType.halfUp).toStringAsFixed(p),
               equals(n.toStringAsFixed(p)));
         });
       });

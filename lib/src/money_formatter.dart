@@ -13,26 +13,27 @@ class MoneyFormatter {
   String _positiveSuffix = '';
   final String _nbsp = String.fromCharCode(0xa0);
 
-  final String userLocale;
-  String _countryLocale;
-  NumberFormat _nfUser;
-  NumberFormat _nfCountry;
-  String decimalSeparator;
-  String groupsSeparator;
-  bool isPrefixCurrency;
-  bool currencyHasSpace;
+  final String _userLocale;
+  final String _countryLocale;
+  late final NumberFormat _nfUser;
+  late final NumberFormat _nfCountry;
+  late final String decimalSeparator;
+  late final String groupsSeparator;
+  late bool isPrefixCurrency;
+  late bool currencyHasSpace;
 
   // used to strip non digits.
   static RegExp notDigits = RegExp('[^0-9]');
 
   //static final RegExp _onlyDigits = RegExp('[0-9]');
 
-  MoneyFormatter(this.userLocale, {String countryLocale}) {
-    _countryLocale = countryLocale ?? userLocale;
-    _nfUser = NumberFormat.currency(locale: userLocale);
+  MoneyFormatter(String countryLocale, {String? userLocale})
+      : _countryLocale = countryLocale,
+        _userLocale = userLocale ?? countryLocale {
+    _nfUser = NumberFormat.currency(locale: _userLocale);
     _nfCountry = NumberFormat.currency(locale: _countryLocale);
-    _findDecimalSeparator();
-    _findGroupsSeparator();
+    decimalSeparator = _findDecimalSeparator();
+    groupsSeparator = _findGroupsSeparator();
     _scanPattern();
   }
 
@@ -72,22 +73,21 @@ class MoneyFormatter {
     }
   }
 
-  String _findDecimalSeparator() =>
-      decimalSeparator = _nfUser.symbols.DECIMAL_SEP;
+  String _findDecimalSeparator() => _nfUser.symbols.DECIMAL_SEP;
 
-  String _findGroupsSeparator() => groupsSeparator = _nfUser.symbols.GROUP_SEP;
+  String _findGroupsSeparator() => _nfUser.symbols.GROUP_SEP;
 
   int _max_int(int first, int second) => first > second ? first : second;
 
   String formatMoney(Money money,
-      {bool showGroups,
-      bool implicitSymbol,
-      bool compactCurrencySymbol,
-      String currencySymbol,
-      String decimalSep,
-      String groupSep,
-      bool optimizedFraction,
-      bool isAccounting}) {
+      {bool? showGroups,
+      bool? implicitSymbol,
+      bool? compactCurrencySymbol,
+      String? currencySymbol,
+      String? decimalSep,
+      String? groupSep,
+      bool? optimizedFraction,
+      bool? isAccounting}) {
     String ret;
     implicitSymbol ??= false;
     compactCurrencySymbol ??= true;
@@ -99,9 +99,11 @@ class MoneyFormatter {
       currencySymbol = '';
     } else {
       if (compactCurrencySymbol) {
-        currencySymbol ??=
-            _nfCountry.simpleCurrencySymbol(_nfCountry.currencyName) ??
-                _nfCountry.currencySymbol;
+        if (currencySymbol == null && _nfCountry.currencyName != null) {
+          currencySymbol =
+              _nfCountry.simpleCurrencySymbol(_nfCountry.currencyName!);
+        }
+        currencySymbol ??= _nfCountry.currencySymbol;
       } else {
         currencySymbol ??= _nfCountry.currencyName;
       }
@@ -157,7 +159,7 @@ class MoneyFormatter {
       ret = '-';
       toBeFormatted = toBeFormatted.replaceFirst('-', '');
     }
-    final int length = toBeFormatted.length.remainder(3);
+    final length = toBeFormatted.length.remainder(3);
     if (length > 0) {
       ret += toBeFormatted.substring(0, length);
       toBeFormatted = toBeFormatted.substring(length, toBeFormatted.length);
@@ -175,7 +177,7 @@ class MoneyFormatter {
   }
 
   Money parse(String value,
-      {String decimal, String thousands, RoundingType rounding}) {
+      {String? decimal, String? thousands, RoundingType? rounding}) {
     Money money;
 
     decimal ??= _nfUser.symbols.DECIMAL_SEP;
@@ -196,8 +198,7 @@ class MoneyFormatter {
       if (isNegative) {
         dec = -dec;
       }
-      money = Money.fromDecimal(dec, userLocale,
-          countryLocale: _countryLocale, rounding: rounding);
+      money = Money.fromDecimal(dec, _countryLocale, rounding: rounding);
     } catch (e) {
       rethrow;
     }

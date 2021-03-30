@@ -3,9 +3,9 @@
 library fixed_decimal.fixed_decimal;
 
 import 'dart:collection';
+import 'dart:math';
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
-import 'package:vy_fixed_decimal/src/extension/num_extension.dart';
 import 'extension/decimal_extension.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart'
     show MoneyFormatter, RoundingType, FractionalPartCriteria;
@@ -15,13 +15,22 @@ part 'parts/money.dart';
 enum ScalingPolicy { adjust, sameAsFirst, biggerScale, thisOrNothing }
 
 class FixedDecimal implements Comparable<FixedDecimal> {
-  Decimal _decimal;
-  Decimal _minimumValue;
+  late Decimal _decimal;
+  late Decimal _minimumValue;
   RoundingType _rounding;
   ScalingPolicy _policy;
-  String _userLocale;
+  String _userLocale = 'en_US';
 
   String get userLocale => _userLocale;
+  set userLocale(String _value) {
+    _userLocale = _value;
+    if (loadedLocales[userLocale] == null) {
+      loadedLocales[userLocale] = true;
+      //Todo, documentation talking about initializing locales,
+      // but no initialization function has been found in code.
+    }
+  }
+
   Decimal get decimal => _decimal;
   Decimal get minimumValue => _minimumValue;
   RoundingType get rounding => _rounding;
@@ -30,91 +39,63 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   static Map<String, bool> loadedLocales = SplayTreeMap();
 
   FixedDecimal._fromDecimal(Decimal decimal,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy,
-      String userLocale}) {
-    minimumValue ??= DecimalExtension.minimumValueFromScale(scale);
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy /* ,
+      String? userLocale */
+      })
+      : _rounding = rounding ?? RoundingType.halfToEven,
+        _policy = policy ?? ScalingPolicy.adjust {
+    if (minimumValue == null && scale != null) {
+      minimumValue = DecimalExtension.minimumValueFromScale(scale);
+    }
     if (minimumValue == null) {
       if (decimal.hasFinitePrecision) {
         minimumValue =
-            DecimalExtension.minimumValueFromScale(decimal.scale.min(10));
+            DecimalExtension.minimumValueFromScale(min<int>(decimal.scale, 10));
       } else {
         minimumValue = DecimalExtension.minimumValueFromScale(10);
       }
     }
     _minimumValue = minimumValue;
-    _rounding = rounding ?? RoundingType.halfToEven;
-    _policy = policy ?? ScalingPolicy.adjust;
+    //_rounding = rounding ?? RoundingType.halfToEven;
+    //_policy = policy ?? ScalingPolicy.adjust;
     _decimal = DecimalExtension.roundDecimalToNearestMultiple(decimal,
         minimumValue: _minimumValue, rounding: rounding);
-    _userLocale = userLocale;
+    /* _userLocale = userLocale;
     if (userLocale != null && loadedLocales[userLocale] == null) {
       loadedLocales[userLocale] = true;
       //Todo, documentation talking about initializing locales,
       // but no initialization function has been found in code.
-    }
+    } */
   }
 
   static FixedDecimal parse(String value,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      String userLocale,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      /* String userLocale, */
+      ScalingPolicy? policy}) {
     return FixedDecimal._fromDecimal(Decimal.parse(value),
         minimumValue: minimumValue,
         scale: scale,
         rounding: rounding,
-        userLocale: userLocale,
+        /*  userLocale: userLocale, */
         policy: policy);
   }
 
   factory FixedDecimal.fromInt(int value,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return FixedDecimal._fromDecimal(Decimal.fromInt(value),
         minimumValue: minimumValue,
         scale: scale,
         rounding: rounding,
         policy: policy);
   }
-/*
-  @Deprecated('use DecimalExt one')
-  static Decimal minimumValueFromScale(int scale) {
-    if (scale == null) {
-      return null;
-    }
-    var dec = dividers[scale];
-    if (dec == null) {
-      dec = dividers[0];
-      var counter = scale;
-      while (counter != 0) {
-        if (counter.isNegative) {
-          if (counter.isOdd) {
-            counter = counter + 1;
-            dec = dec * dividers[-1];
-          } else {
-            counter = counter + 2;
-            dec = dec * dividers[-2];
-          }
-        } else {
-          if (counter.isOdd) {
-            counter = counter - 1;
-            dec = dec * dividers[1];
-          } else {
-            counter = counter - 2;
-            dec = dec * dividers[2];
-          }
-        }
-      }
-      dividers[scale] = dec;
-    }
-    return dec;
-  }*/
 
   /// Returns the fractional part of a Decimal
   ///
@@ -126,13 +107,12 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   /// 2) frac ⁡ ( x ) = | x | − ⌊ | x | ⌋
   /// 3) frac ⁡ ( x ) =  x − ⌈ x ⌉
   FixedDecimal fractionalPart(
-      [FractionalPartCriteria criteria = FractionalPartCriteria.ceil]) {
-    return FixedDecimal._fromDecimal(_fractionalPart(_decimal, criteria),
-        minimumValue: _minimumValue, rounding: _rounding, policy: _policy);
-  }
+          [FractionalPartCriteria criteria = FractionalPartCriteria.ceil]) =>
+      FixedDecimal._fromDecimal(_fractionalPart(_decimal, criteria),
+          minimumValue: _minimumValue, rounding: _rounding, policy: _policy);
 
   Decimal _fractionalPart(Decimal value, FractionalPartCriteria criteria) {
-    if (value == null || value.isNaN || value.isInfinite) {
+    if (/* value == null || */ value.isNaN || value.isInfinite) {
       return value;
     }
     if (!value.isNegative) {
@@ -146,16 +126,16 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       case FractionalPartCriteria.ceil:
         return value - value.ceil();
     }
-    return value;
+    //return value;
   }
 
   bool get isEven => _decimal.isEven;
 
   FixedDecimal roundToNearestMultiple(
-      {Object minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Object? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     if (scale == null) {
       minimumValue ??= _minimumValue;
     }
@@ -277,11 +257,13 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       Object secondOperandObj,
       Decimal Function() defineOperation,
       Decimal Function() defineMinimumValue,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
-    minimumValue ??= DecimalExtension.minimumValueFromScale(scale);
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
+    if (minimumValue == null && scale != null) {
+      minimumValue = DecimalExtension.minimumValueFromScale(scale);
+    }
     if (policy == null || minimumValue == null) {
       if (policy != null) {
         // so minimum value is null
@@ -362,8 +344,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
                   rounding: rounding ?? secondOperandObj.rounding,
                   policy: policy ?? secondOperandObj.policy);
             } else {
-              assert(
-                  false,
+              throw ArgumentError(
                   'Unmanaged object type "${firstOperandObj.runtimeType}"'
                   ' as first operand');
             }
@@ -387,8 +368,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
                   rounding: rounding,
                   policy: policy);
             } else {
-              assert(
-                  false,
+              throw ArgumentError(
                   'Unmanaged object type "${firstOperandObj.runtimeType}"'
                   ' as first operand');
             }
@@ -418,10 +398,10 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   FixedDecimal operator +(dynamic other) => addition(this, other);
 
   FixedDecimal add(Object addendObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return addition(this, addendObj,
         minimumValue: minimumValue,
         scale: scale,
@@ -430,21 +410,21 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   }
 
   static FixedDecimal addition(Object augendObj, Object addendObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     final augend = DecimalExtension.decimalFromObject(augendObj);
-    if (augend == null) {
+    /* if (augend == null) {
       return null;
-    }
+    } */
     if (augend.isNaN || augend.isInfinite) {
       return FixedDecimal._fromDecimal(augend);
     }
     final addend = DecimalExtension.decimalFromObject(addendObj);
-    if (addend == null) {
+    /* if (addend == null) {
       return null;
-    }
+    } */
     if (addend.isNaN || addend.isInfinite) {
       return FixedDecimal._fromDecimal(addend);
     }
@@ -464,7 +444,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           return addendObj._minimumValue;
         } else {
           return DecimalExtension.minimumValueFromScale(
-              (augend + addend).scale.min(10));
+              min<int>((augend + addend).scale, 10));
         }
       }
     }
@@ -489,10 +469,10 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           */
 
   FixedDecimal subtract(Object subtrahendObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return subtraction(this, subtrahendObj,
         minimumValue: minimumValue,
         scale: scale,
@@ -501,21 +481,21 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   }
 
   static FixedDecimal subtraction(Object minuendObj, Object subtrahendObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     final minuend = DecimalExtension.decimalFromObject(minuendObj);
-    if (minuend == null) {
+    /* if (minuend == null) {
       return null;
-    }
+    } */
     if (minuend.isNaN || minuend.isInfinite) {
       return FixedDecimal._fromDecimal(minuend);
     }
     final subtrahend = DecimalExtension.decimalFromObject(subtrahendObj);
-    if (subtrahend == null) {
+    /* if (subtrahend == null) {
       return null;
-    }
+    } */
     if (subtrahend.isNaN || subtrahend.isInfinite) {
       return FixedDecimal._fromDecimal(subtrahend);
     }
@@ -538,8 +518,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           return subtrahendObj._minimumValue;
         } else {
           return DecimalExtension.minimumValueFromScale(
-              (minuend - subtrahend).scale.min(10)
-              /*MathExtension.min((minuend - subtrahend).scale, 10)*/);
+              min<int>((minuend - subtrahend).scale, 10));
         }
       }
     }
@@ -550,9 +529,6 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         policy: policy,
         scale: scale,
         rounding: rounding);
-    /*
-    return new FixedDecimal._fromDecimal(minuend - subtrahend,
-        minimumValue: minimumValue, scale: scale, rounding: rounding); */
   }
 
   /// Multiplication operator.
@@ -563,10 +539,10 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           minimumValue: _minimumValue, rounding: _rounding); */
 
   FixedDecimal multiply(Object multiplierObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return multiplication(this, multiplierObj,
         minimumValue: minimumValue,
         scale: scale,
@@ -576,21 +552,17 @@ class FixedDecimal implements Comparable<FixedDecimal> {
 
   static FixedDecimal multiplication(
       Object multiplicandObj, Object multiplierObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     final multiplicand = DecimalExtension.decimalFromObject(multiplicandObj);
-    if (multiplicand == null) {
-      return null;
-    }
+
     if (multiplicand.isNaN || multiplicand.isInfinite) {
       return FixedDecimal._fromDecimal(multiplicand);
     }
     final multiplier = DecimalExtension.decimalFromObject(multiplierObj);
-    if (multiplier == null) {
-      return null;
-    }
+
     if (multiplier.isNaN || multiplier.isInfinite) {
       return FixedDecimal._fromDecimal(multiplier);
     }
@@ -610,8 +582,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           return multiplierObj._minimumValue;
         } else {
           return DecimalExtension.minimumValueFromScale(
-              (multiplicand * multiplier).scale.min(10)
-              /*MathExtension.min((multiplicand * multiplier).scale, 10)*/);
+              min<int>((multiplicand * multiplier).scale, 10));
         }
       }
     }
@@ -622,9 +593,6 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         policy: policy,
         scale: scale,
         rounding: rounding);
-    /*
-    return new FixedDecimal._fromDecimal(multiplicand * multiplier,
-        minimumValue: minimumValue, scale: scale, rounding: rounding); */
   }
 
   static Decimal _mod(Decimal dividend, Decimal divisor) {
@@ -643,18 +611,11 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           minimumValue: _minimumValue, rounding: _rounding); */
   FixedDecimal operator %(Object other) => modulusDivision(this, other);
 
-  /*{
-    Decimal remainder = _decimal.remainder(other._decimal);
-    if (remainder.signum + other.signum == 0) return addition(other, remainder);
-    return new FixedDecimal._fromDecimal(remainder,
-        minimumValue: _minimumValue, rounding: _rounding);
-  } */
-
   FixedDecimal modulo(Object divisorObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return modulusDivision(this, divisorObj,
         minimumValue: minimumValue,
         scale: scale,
@@ -663,21 +624,17 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   }
 
   static FixedDecimal modulusDivision(Object dividendObj, Object divisorObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
-    if (dividend == null) {
-      return null;
-    }
+
     if (dividend.isNaN || dividend.isInfinite) {
       return FixedDecimal._fromDecimal(dividend);
     }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-    if (divisor == null) {
-      return null;
-    }
+
     if (divisor.isNaN || divisor.isInfinite) {
       return FixedDecimal._fromDecimal(divisor);
     }
@@ -697,8 +654,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           return divisorObj._minimumValue;
         } else {
           return DecimalExtension.minimumValueFromScale(
-              (_mod(dividend, divisor)).scale.min(10)
-              /*MathExtension.min((_mod(dividend, divisor)).scale, 10)*/);
+              min((_mod(dividend, divisor)).scale, 10));
         }
       }
     }
@@ -713,24 +669,16 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         policy: policy,
         scale: scale,
         rounding: rounding);
-    /*
-    return new FixedDecimal._fromDecimal(dividend % divisor,
-        minimumValue: minimumValue, scale: scale, rounding: rounding);
-        */
   }
 
   /// Division operator.
-  FixedDecimal operator /(Object other) =>
-      division(this, other /*, rounding: _rounding*/);
-  /*
-      new FixedDecimal._fromDecimal(_decimal / other._decimal,
-          minimumValue: _minimumValue, rounding: _rounding); */
+  FixedDecimal operator /(Object other) => division(this, other);
 
   FixedDecimal divide(Object divisorObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return division(this, divisorObj,
         minimumValue: minimumValue,
         scale: scale,
@@ -739,21 +687,17 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   }
 
   static FixedDecimal division(Object dividendObj, Object divisorObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
-    if (dividend == null) {
-      return null;
-    }
+
     if (dividend.isNaN || dividend.isInfinite) {
       return FixedDecimal._fromDecimal(dividend);
     }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-    if (divisor == null) {
-      return null;
-    }
+
     if (divisor.isNaN || divisor.isInfinite) {
       return FixedDecimal._fromDecimal(divisor);
     }
@@ -773,8 +717,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           return divisorObj._minimumValue;
         } else {
           return DecimalExtension.minimumValueFromScale(
-              (dividend / divisor).scale.min(10)
-              /*MathExtension.min((dividend / divisor).scale, 10)*/);
+              min((dividend / divisor).scale, 10));
         }
       }
     }
@@ -785,10 +728,6 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         policy: policy,
         scale: scale,
         rounding: rounding);
-    /*
-    return new FixedDecimal._fromDecimal(dividend % divisor,
-        minimumValue: minimumValue, scale: scale, rounding: rounding);
-        */
   }
 
   /// Truncating division operator.
@@ -802,10 +741,10 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           minimumValue: _minimumValue, rounding: _rounding); */
 
   FixedDecimal divideAsInteger(Object divisorObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     return integerDivision(this, divisorObj,
         minimumValue: minimumValue,
         scale: scale,
@@ -814,21 +753,17 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   }
 
   static FixedDecimal integerDivision(Object dividendObj, Object divisorObj,
-      {Decimal minimumValue,
-      int scale,
-      RoundingType rounding,
-      ScalingPolicy policy}) {
+      {Decimal? minimumValue,
+      int? scale,
+      RoundingType? rounding,
+      ScalingPolicy? policy}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
-    if (dividend == null) {
-      return null;
-    }
+
     if (dividend.isNaN || dividend.isInfinite) {
       return FixedDecimal._fromDecimal(dividend);
     }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-    if (divisor == null) {
-      return null;
-    }
+
     if (divisor.isNaN || divisor.isInfinite) {
       return FixedDecimal._fromDecimal(divisor);
     }
@@ -846,9 +781,6 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         policy: policy,
         scale: scale,
         rounding: rounding);
-    /*
-    return new FixedDecimal._fromDecimal(dividend ~/ divisor,
-        minimumValue: minimumValue, scale: scale, rounding: rounding); */
   }
 
   /// Negate operator. */
@@ -983,7 +915,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
 
   /// Converts a [num] to a string in decimal exponential notation with
   /// [fractionDigits] digits after the decimal point.
-  String toStringAsExponential([int fractionDigits]) =>
+  String toStringAsExponential([int? fractionDigits]) =>
       _decimal.toStringAsExponential(fractionDigits);
 
   /// Converts a [num] to a string representation with [precision]
@@ -991,24 +923,24 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   String toStringAsPrecision(int precision) =>
       _decimal.toStringAsPrecision(precision);
 
-  String formattedString(String pattern, {String userLocale}) {
+  String formattedString(String pattern, {String? userLocale}) {
     userLocale ??= _userLocale;
     final nf = NumberFormat(pattern, userLocale);
     return nf.format(_decimal.toDouble());
   }
 
   Decimal parseFormattedString(String value, String pattern,
-      {String userLocale}) {
+      {String? userLocale}) {
     userLocale ??= _userLocale;
     final nf = NumberFormat(pattern, userLocale);
     return Decimal.parse(nf.parse(value).toString());
   }
 
   String formattedCurrency(
-      {String userLocale,
-      String symbol,
-      int decimalDigits,
-      bool turnOffGrouping}) {
+      {String? userLocale,
+      String? symbol,
+      int? decimalDigits,
+      bool? turnOffGrouping}) {
     turnOffGrouping ??= false;
     userLocale ??= _userLocale;
     decimalDigits ??= _decimal.scale;
@@ -1021,7 +953,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   }
 
   Decimal parseFormattedCurrency(String value,
-      {String userLocale, String symbol}) {
+      {String? userLocale, String? symbol}) {
     userLocale ??= _userLocale;
     final currency = NumberFormat.currency(locale: userLocale, symbol: symbol);
     if (value.endsWith(currency.currencySymbol)) {

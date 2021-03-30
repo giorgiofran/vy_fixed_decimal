@@ -53,7 +53,7 @@ void main() {
       DecimalPoint(89, 184),
     ];
     final reg = LinearRegression(points);
-    reg.calculate();
+    //reg.calculate();
     test('Mean Point', () {
       expect(reg.meanPoint, DecimalPoint(75, 178));
     });

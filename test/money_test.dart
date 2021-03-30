@@ -4,8 +4,8 @@ import 'package:decimal/decimal.dart';
 import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 
-Money money(String value, String locale, {RoundingType rounding}) =>
-    Money.parse(value, locale, rounding: rounding);
+Money money(String value, String countryLocale, {RoundingType? rounding}) =>
+    Money.parse(value, countryLocale, rounding: rounding);
 
 double round(double value, [double increment = 1.0]) {
   var val = Decimal.parse(value.toString());
@@ -347,7 +347,7 @@ void main() {
     });
 
     test('toStringAsFixed(int fractionDigits)', () {
-      [0.0, 1.0, 23.0, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((num n) {
+      [0.0, 1.0, 23.0, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((double n) {
         [0, 1, 5, 10].forEach((p) {
           expect(money(n.toString(), 'en_US').toStringAsFixed(p),
               equals(round(n, 0.01).toStringAsFixed(p)));
@@ -355,7 +355,7 @@ void main() {
       });
     });
     test('toStringAsExponential(int fractionDigits)', () {
-      [0.0, 1.0, 23.0, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((num n) {
+      [0.0, 1.0, 23.0, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((double n) {
         [1, 5, 10].forEach((p) {
           expect(money(n.toString(), 'en_US').toStringAsExponential(p),
               equals(round(n, 0.01).toStringAsExponential(p)));
@@ -363,7 +363,7 @@ void main() {
       });
     });
     test('toStringAsPrecision(int precision)', () {
-      [0.0, 1.0, 23.0, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((num n) {
+      [0.0, 1.0, 23.0, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((double n) {
         [1, 5, 10].forEach((p) {
           expect(money(n.toString(), 'en_US').toStringAsPrecision(p),
               equals(round(n, 0.01).toStringAsPrecision(p)));
@@ -372,7 +372,7 @@ void main() {
     }, skip: true); // At present decimal returns 20 instead of 2e+1
 
     test('Explicit currency name', () {
-      var fix = Money.parse('1000000.32', 'en_US', countryLocale: 'it_IT');
+      var fix = Money.parse('1000000.32',  'it_IT', userLocale: 'en_US');
       var formatted = fix.formattedCurrency(userLocale: 'en_US', symbol: '€');
       expect(formatted, '1,000,000.32 €');
       fix = Money.parse('1000000.32', 'en_US');
@@ -382,7 +382,7 @@ void main() {
       formatted = fix.formattedCurrency(userLocale: 'en_US', symbol: r'$');
       expect(formatted, r'$1,000,000.32');
 
-      fix = Money.parse('1000000.32', 'de_CH', countryLocale: 'en_US');
+      fix = Money.parse('1000000.32','en_US', userLocale: 'de_CH');
       formatted = fix.formattedCurrency(userLocale: 'de_CH', symbol: r'$');
       //var nbsp = new String.fromCharCode(0xa0);
       expect(formatted, r'$1’000’000.32');

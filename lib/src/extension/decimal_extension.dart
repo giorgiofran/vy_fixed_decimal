@@ -18,7 +18,7 @@ Decimal decHalf = Decimal.parse('0.5');
 Decimal decTenths = Decimal.parse('0.1');
 Decimal decHundredths = Decimal.parse('0.01');
 
-Map<int, Decimal> _dividers = {
+final Map<int, Decimal> _dividers = {
   -2: decimal100,
   -1: decimal10,
   0: Decimal.one,
@@ -29,41 +29,16 @@ Map<int, Decimal> _dividers = {
 extension DecimalExtension on Decimal {
   // ************ STATIC *****************
   static Decimal minimumValueFromScale(int scale) {
-    if (scale == null) {
-      return null;
+    if (_dividers[scale] == null) {
+      _dividers[scale] = decimal10.power(-scale);
     }
-    var decimal = _dividers[scale];
-    if (decimal == null) {
-      decimal = _dividers[0];
-      var counter = scale;
-      while (counter != 0) {
-        if (counter.isNegative) {
-          if (counter.isOdd) {
-            counter = counter + 1;
-            decimal = decimal * _dividers[-1];
-          } else {
-            counter = counter + 2;
-            decimal = decimal * _dividers[-2];
-          }
-        } else {
-          if (counter.isOdd) {
-            counter = counter - 1;
-            decimal = decimal * _dividers[1];
-          } else {
-            counter = counter - 2;
-            decimal = decimal * _dividers[2];
-          }
-        }
-      }
-      _dividers[scale] = decimal;
-    }
-    return decimal;
+    return _dividers[scale]!;
   }
 
   static Decimal decimalFromObject(Object value) {
-    if (value == null) {
+    /*  if (value == null) {
       return null;
-    }
+    } */
     Decimal decimal;
     if (value is Decimal) {
       decimal = value;
@@ -84,23 +59,23 @@ extension DecimalExtension on Decimal {
   }
 
   static Decimal roundDecimalToNearestMultiple(Object objValue,
-      {Object minimumValue,
-      int scale,
-      RoundingType rounding = RoundingType.halfToEven}) {
-    var decimal = decimalFromObject(minimumValue);
-    if (decimal == null && scale != null) {
-      decimal = minimumValueFromScale(scale);
+      {Object? minimumValue, int? scale, RoundingType? rounding}) {
+    Decimal? checkDecimal;
+    var _rounding = rounding ?? RoundingType.halfToEven;
+    if (minimumValue != null) {
+      checkDecimal = decimalFromObject(minimumValue);
+    } else if (scale != null) {
+      checkDecimal = minimumValueFromScale(scale);
     }
-    decimal ??= Decimal.one;
+    var decimal = checkDecimal ?? Decimal.one;
     final originalValue = decimalFromObject(objValue);
-    if (originalValue == null ||
-        originalValue.isNaN ||
-        originalValue.isInfinite) {
+    if (/* originalValue == null || */
+        originalValue.isNaN || originalValue.isInfinite) {
       return originalValue;
     }
     var value = originalValue / decimal;
     Decimal fraPart;
-    switch (rounding) {
+    switch (_rounding) {
       case RoundingType.floor:
         value = value.floor();
         break;
@@ -239,6 +214,6 @@ extension DecimalExtension on Decimal {
       case FractionalPartCriteria.ceil:
         return this - ceil();
     }
-    return this;
+    //return this;
   }
 }

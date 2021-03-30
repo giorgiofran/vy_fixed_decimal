@@ -11,17 +11,17 @@ class DecimalFormatter {
   String _positiveSuffix = '';
 
   final String userLocale;
-  NumberFormat _nfUser;
-  String decimalSeparator;
-  String groupsSeparator;
+  late final NumberFormat _nfUser;
+  late final String decimalSeparator;
+  late final String groupsSeparator;
 
   // used to strip non digits.
   static RegExp notDigits = RegExp('[^0-9]');
 
   DecimalFormatter(this.userLocale) {
     _nfUser = NumberFormat.decimalPattern(userLocale);
-    _findDecimalSeparator();
-    _findGroupsSeparator();
+    decimalSeparator = _findDecimalSeparator();
+    groupsSeparator = _findGroupsSeparator();
     _scanPattern();
   }
 
@@ -43,19 +43,18 @@ class DecimalFormatter {
     }
   }
 
-  String _findDecimalSeparator() =>
-      decimalSeparator = _nfUser.symbols.DECIMAL_SEP;
+  String _findDecimalSeparator() => _nfUser.symbols.DECIMAL_SEP;
 
-  String _findGroupsSeparator() => groupsSeparator = _nfUser.symbols.GROUP_SEP;
+  String _findGroupsSeparator() => _nfUser.symbols.GROUP_SEP;
 
   int _max_int(int first, int second) => first > second ? first : second;
 
   String formatDecimal(Decimal decimal,
-      {bool showGroups,
-      String decimalSep,
-      String groupSep,
-      bool optimizedFraction,
-      bool isAccounting}) {
+      {bool? showGroups,
+      String? decimalSep,
+      String? groupSep,
+      bool? optimizedFraction,
+      bool? isAccounting}) {
     String ret;
     showGroups ??= true;
     optimizedFraction ??= true;
@@ -103,7 +102,7 @@ class DecimalFormatter {
       ret = '-';
       toBeFormatted = toBeFormatted.replaceFirst('-', '');
     }
-    final int length = toBeFormatted.length.remainder(3);
+    final length = toBeFormatted.length.remainder(3);
     if (length > 0) {
       ret += toBeFormatted.substring(0, length);
       toBeFormatted = toBeFormatted.substring(length, toBeFormatted.length);
@@ -121,7 +120,7 @@ class DecimalFormatter {
   }
 
   Decimal parse(String value,
-      {String decimalString, String thousands, RoundingType rounding}) {
+      {String? decimalString, String? thousands, RoundingType? rounding}) {
     Decimal decimal;
 
     decimalString ??= _nfUser.symbols.DECIMAL_SEP;

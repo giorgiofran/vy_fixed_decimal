@@ -5,31 +5,44 @@ import 'utils/decimal_point.dart';
 class LinearRegression {
   final List<DecimalPoint> points;
 
-  DecimalPoint _meanPoint;
-  DecimalPoint get meanPoint => _meanPoint;
+  DecimalPoint? _meanPoint;
+  DecimalPoint get meanPoint => _meanPoint ??= calculateMeanPoint();
 
-  Decimal _a;
-  Decimal _b;
-  Decimal _coefficient;
-  Decimal _deltaX2, _deltaY2, _deltaProduct;
+  Decimal? _a;
+  Decimal? _b;
+  Decimal? _coefficient;
+  Decimal? _deltaX2, _deltaY2, _deltaProduct;
 
-  Decimal get a => _a;
-  Decimal get b => _b;
-  Decimal get coefficientOfDetermination => _coefficient;
-  Decimal get meanDeltaX2 => _deltaX2;
-  Decimal get meanDeltaY2 => _deltaY2;
-  Decimal get meanDeltaProduct => _deltaProduct;
+  Decimal get a => _a ??= meanPoint.y - meanPoint.x * b;
+  Decimal get b => _b ??= meanDeltaProduct / meanDeltaX2;
+  Decimal get coefficientOfDetermination =>
+      _coefficient ??= meanDeltaProduct.pow(2) / (meanDeltaX2 * meanDeltaY2);
+  Decimal get meanDeltaX2 {
+    if (_deltaX2 == null) {
+      _deltaProduct = calculateDeltaProduct();
+    }
+    return _deltaX2!;
+  }
+
+  Decimal get meanDeltaY2 {
+    if (_deltaY2 == null) {
+      _deltaProduct = calculateDeltaProduct();
+    }
+    return _deltaY2!;
+  }
+
+  Decimal get meanDeltaProduct => _deltaProduct ??= calculateDeltaProduct();
 
   LinearRegression(this.points);
 
-  void calculate() {
-    calculateMeanPoint();
-    calculateDeltaSquares();
+  /*  void calculate() {
+    _meanPoint = calculateMeanPoint();
+    _deltaProduct = calculateDeltaProduct();
     calculateLineCoefficients();
     calculateCoefficientOfDetermination();
-  }
+  } */
 
-  void calculateMeanPoint() {
+  DecimalPoint calculateMeanPoint() {
     var totalX = Decimal.zero;
     var totalY = Decimal.zero;
     for (var point in points) {
@@ -37,29 +50,29 @@ class LinearRegression {
       totalY += point.y;
     }
     final count = Decimal.fromInt(points.length);
-    _meanPoint = DecimalPoint(totalX / count, totalY / count);
+    return DecimalPoint(totalX / count, totalY / count);
   }
 
-  void calculateDeltaSquares() {
+  Decimal calculateDeltaProduct() {
     var totalX = Decimal.zero;
     var totalY = Decimal.zero;
     var totalProduct = Decimal.zero;
     for (var p in points) {
-      totalX += (p.x - _meanPoint.x).pow(2);
-      totalY += (p.y - _meanPoint.y).pow(2);
-      totalProduct += (p.x - _meanPoint.x) * (p.y - _meanPoint.y);
+      totalX += (p.x - meanPoint.x).pow(2);
+      totalY += (p.y - meanPoint.y).pow(2);
+      totalProduct += (p.x - meanPoint.x) * (p.y - meanPoint.y);
     }
     final count = Decimal.fromInt(points.length);
     _deltaX2 = totalX / count;
     _deltaY2 = totalY / count;
-    _deltaProduct = totalProduct / count;
+    return totalProduct / count;
   }
 
-  void calculateLineCoefficients() {
-    _b = _deltaProduct / _deltaX2;
-    _a = _meanPoint.y - _meanPoint.x * _b;
+  /*  void calculateLineCoefficients() {
+    _b = meanDeltaProduct / _deltaX2;
+    _a = meanPoint.y - meanPoint.x * _b;
   }
 
   void calculateCoefficientOfDetermination() =>
-      _coefficient = _deltaProduct.pow(2) / (_deltaX2 * _deltaY2);
+      _coefficient = meanDeltaProduct.pow(2) / (_deltaX2 * _deltaY2); */
 }
