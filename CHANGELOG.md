@@ -1,3 +1,6 @@
-## 3.0.0
+# Changelog
 
-- Initial version
+## 4.0.1
+
+- Null-safety final
+- Made FixedDecimal.fromDecimal public

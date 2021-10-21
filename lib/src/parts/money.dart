@@ -18,7 +18,7 @@ class Money implements Comparable<Money> {
 
     var minimumValue = DecimalExtension.minimumValueFromScale(
         _getScaleFromPattern(countryLocale));
-    _fixed = FixedDecimal._fromDecimal(decimal,
+    _fixed = FixedDecimal.fromDecimal(decimal,
         //userLocale: userLocale,
         minimumValue: minimumValue,
         rounding: rounding ?? RoundingType.halfAwayFromZero,
@@ -118,14 +118,14 @@ class Money implements Comparable<Money> {
       return obj._fixed;
     }
     if (obj is Decimal) {
-      return FixedDecimal._fromDecimal(
+      return FixedDecimal.fromDecimal(
           obj /*, minimumValue: minimumValue,
             rounding: rounding, policy: policy, locale: locale*/
           );
     } else {
       try {
         final dec = DecimalExtension.decimalFromObject(obj);
-        return FixedDecimal._fromDecimal(
+        return FixedDecimal.fromDecimal(
             dec /*, minimumValue: minimumValue,
             rounding: rounding, policy: policy, locale: locale*/
             );
