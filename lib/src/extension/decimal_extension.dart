@@ -1,12 +1,13 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
+import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:vy_fixed_decimal/src/enums/rounding_type.dart';
 
 import '../enums/fractional_part_criteria.dart';
 import '../fixed_decimal.dart';
 
-Decimal decimal0 = Decimal.zero;
+//Decimal decimal0 = Decimal.zero;
 Decimal decimal1 = Decimal.one;
 Decimal decimal2 = Decimal.fromInt(2);
 Decimal decimal10 = Decimal.parse('10');
@@ -27,7 +28,24 @@ final Map<int, Decimal> _dividers = {
 };
 
 extension DecimalExtension on Decimal {
-  // ************ STATIC *****************
+  /// HasFinitePrecision
+  ///
+  /// Returns `true` if this [Decimal] has a finite precision.
+  /// Having a finite precision means that the number can be exactly represented
+  /// as decimal with a finite number of fractional digits.
+  bool get hasFinitePrecision => toRational().hasFinitePrecision;
+  bool get isInfinite => !hasFinitePrecision;
+
+  /// IsNegative
+  ///
+  /// Returns `true` if this [Decimal] is lesser than zero.
+  bool get isNegative => signum < 0;
+
+  /// IsNaN
+  ///
+  /// Returns always `false`, as a [Decimal] is always a valid number.
+  bool get isNaN => false;
+
   static Decimal minimumValueFromScale(int scale) {
     if (_dividers[scale] == null) {
       _dividers[scale] = decimal10.power(-scale);
@@ -61,7 +79,7 @@ extension DecimalExtension on Decimal {
   static Decimal roundDecimalToNearestMultiple(Object objValue,
       {Object? minimumValue, int? scale, RoundingType? rounding}) {
     Decimal? checkDecimal;
-    var _rounding = rounding ?? RoundingType.halfToEven;
+    var locRounding = rounding ?? RoundingType.halfToEven;
     if (minimumValue != null) {
       checkDecimal = decimalFromObject(minimumValue);
     } else if (scale != null) {
@@ -73,9 +91,10 @@ extension DecimalExtension on Decimal {
         originalValue.isNaN || originalValue.isInfinite) {
       return originalValue;
     }
-    var value = originalValue / decimal;
+    var value =
+        (originalValue / decimal).toDecimal(scaleOnInfinitePrecision: scale);
     Decimal fraPart;
-    switch (_rounding) {
+    switch (locRounding) {
       case RoundingType.floor:
         value = value.floor();
         break;
@@ -186,13 +205,14 @@ extension DecimalExtension on Decimal {
     return value;
   }
 
-  // ************ INSTANCE ****************
   String toJson() => toString();
   bool get isZero => this == Decimal.zero;
   bool get isEven => truncate() % decimal2 == Decimal.zero;
   // Accepts also negative exponents
-  Decimal power(int exponent) =>
-      exponent.isNegative ? Decimal.one / pow(-exponent) : pow(exponent);
+  Decimal power(int exponent) => exponent.isNegative
+      ? (Decimal.one / pow(-exponent))
+          .toDecimal(scaleOnInfinitePrecision: math.max<int>(scale, 10))
+      : pow(exponent);
 
   Decimal min(Decimal other) => this < other ? this : other;
   Decimal max(Decimal other) => this > other ? this : other;

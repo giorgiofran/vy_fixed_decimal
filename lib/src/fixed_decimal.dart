@@ -22,8 +22,8 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   String _userLocale = 'en_US';
 
   String get userLocale => _userLocale;
-  set userLocale(String _value) {
-    _userLocale = _value;
+  set userLocale(String value) {
+    _userLocale = value;
     if (loadedLocales[userLocale] == null) {
       loadedLocales[userLocale] = true;
       //Todo, documentation talking about initializing locales,
@@ -252,7 +252,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
     };
   }
 
-  static FixedDecimal _resolveOperation(
+  static FixedDecimal resolveOperation(
       Object firstOperandObj,
       Object secondOperandObj,
       Decimal Function() defineOperation,
@@ -429,7 +429,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       return FixedDecimal.fromDecimal(addend);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -449,8 +449,8 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       }
     }
 
-    return _resolveOperation(
-        augendObj, addendObj, () => augend + addend, _defineMinimumValue,
+    return resolveOperation(
+        augendObj, addendObj, () => augend + addend, defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
         scale: scale,
@@ -500,7 +500,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       return FixedDecimal.fromDecimal(subtrahend);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -523,8 +523,8 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       }
     }
 
-    return _resolveOperation(minuendObj, subtrahendObj,
-        () => minuend - subtrahend, _defineMinimumValue,
+    return resolveOperation(minuendObj, subtrahendObj,
+        () => minuend - subtrahend, defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
         scale: scale,
@@ -567,7 +567,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       return FixedDecimal.fromDecimal(multiplier);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -587,8 +587,8 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       }
     }
 
-    return _resolveOperation(multiplicandObj, multiplierObj,
-        () => multiplicand * multiplier, _defineMinimumValue,
+    return resolveOperation(multiplicandObj, multiplierObj,
+        () => multiplicand * multiplier, defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
         scale: scale,
@@ -639,7 +639,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       return FixedDecimal.fromDecimal(divisor);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -659,12 +659,12 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       }
     }
 
-    return _resolveOperation(
+    return resolveOperation(
         dividendObj,
         divisorObj,
         () => _mod(dividend,
             divisor) /*dividend % divisor (because of bug in Rational modulo*/,
-        _defineMinimumValue,
+        defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
         scale: scale,
@@ -702,7 +702,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       return FixedDecimal.fromDecimal(divisor);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -717,13 +717,17 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           return divisorObj._minimumValue;
         } else {
           return DecimalExtension.minimumValueFromScale(
-              min((dividend / divisor).scale, 10));
+              min((dividend / divisor).toDecimal().scale, 10));
         }
       }
     }
 
-    return _resolveOperation(
-        dividendObj, divisorObj, () => dividend / divisor, _defineMinimumValue,
+    return resolveOperation(
+        dividendObj,
+        divisorObj,
+        () => (dividend / divisor)
+            .toDecimal(scaleOnInfinitePrecision: scale ?? 10),
+        defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
         scale: scale,
@@ -768,15 +772,15 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       return FixedDecimal.fromDecimal(divisor);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
       return Decimal.one;
     }
 
-    return _resolveOperation(
-        dividendObj, divisorObj, () => dividend ~/ divisor, _defineMinimumValue,
+    return resolveOperation(dividendObj, divisorObj,
+        () => Decimal.fromBigInt(dividend ~/ divisor), defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
         scale: scale,
@@ -851,23 +855,23 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   ///  [:(3.5).round() == 4:] and [:(-3.5).round() == -4:].
   ///
   /// The result is a double.
-  double roundToDouble() => _decimal.roundToDouble();
+  double roundToDouble() => _decimal.round().toDouble();
 
   /// Returns the greatest integer value no greater than `this`.
   ///
   /// The result is a double.
-  double floorToDouble() => _decimal.floorToDouble();
+  double floorToDouble() => _decimal.floor().toDouble();
 
   /// Returns the least integer value no smaller than `this`.
   ///
   /// The result is a double.
-  double ceilToDouble() => _decimal.ceilToDouble();
+  double ceilToDouble() => _decimal.ceil().toDouble();
 
   /// Returns the integer obtained by discarding any fractional
   /// digits from `this`.
   ///
   /// The result is a double.
-  double truncateToDouble() => _decimal.truncateToDouble();
+  double truncateToDouble() => _decimal.truncate().toDouble();
 
   /// Clamps this to be in the range [lowerLimit]-[upperLimit]. The comparison
   /// is done using [compareTo] and therefore takes [:-0.0:] into account.
@@ -879,7 +883,12 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           policy: _policy);
 
   /// Truncates this [num] to an integer and returns the result as an [int].
-  int toInt() => _decimal.toInt();
+  /// If the number does not fit, clamps to the max (or min) integer.
+  ///
+  /// **Warning:** the clamping behaves differently between the web and
+  /// native platforms due to the differences in integer precision.
+  ///
+  int toInt() => _decimal.toBigInt().toInt();
 
   /// Return this [num] as a [double].
   ///
@@ -916,7 +925,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   /// Converts a [num] to a string in decimal exponential notation with
   /// [fractionDigits] digits after the decimal point.
   String toStringAsExponential([int? fractionDigits]) =>
-      _decimal.toStringAsExponential(fractionDigits);
+      _decimal.toStringAsExponential(fractionDigits ?? scale);
 
   /// Converts a [num] to a string representation with [precision]
   /// significant digits.

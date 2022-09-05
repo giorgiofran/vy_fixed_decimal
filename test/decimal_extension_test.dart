@@ -1,7 +1,6 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
 import 'package:test/test.dart';
-import 'package:decimal/decimal.dart';
 import 'package:vy_fixed_decimal/src/linear_regression.dart';
 import 'package:vy_fixed_decimal/src/utils/decimal_point.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
@@ -26,7 +25,8 @@ void main() {
   test('Pow Test', () {
     expect(dec('3.0').pow(2), dec('9.0'));
     expect(dec('3.0').power(2), dec('9.0'));
-    expect(dec('3.0').power(-2), decimal1 / dec('9.0'));
+    expect(dec('3.0').power(-2),
+        (decimal1 / dec('9.0')).toDecimal(scaleOnInfinitePrecision: 10));
     expect(dec('3.0').power(0), decimal1);
     expect(dec('3.0').power(12), dec('531441'));
     expect(dec('141.0').pow(7), dec('1107984764452581'));

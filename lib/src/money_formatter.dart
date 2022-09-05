@@ -1,6 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
-import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 
@@ -77,7 +76,7 @@ class MoneyFormatter {
 
   String _findGroupsSeparator() => _nfUser.symbols.GROUP_SEP;
 
-  int _max_int(int first, int second) => first > second ? first : second;
+  int _maxInt(int first, int second) => first > second ? first : second;
 
   String formatMoney(Money money,
       {bool? showGroups,
@@ -118,7 +117,7 @@ class MoneyFormatter {
     }
 
     ret = money.decimal.abs().toStringAsFixed(optimizedFraction
-        ? _max_int(money.scale, _nfUser.minimumFractionDigits)
+        ? _maxInt(money.scale, _nfUser.minimumFractionDigits)
         : _nfUser.maximumFractionDigits);
 
     final List parts = ret.split('.');
@@ -131,10 +130,8 @@ class MoneyFormatter {
       suffixCurrency = '';
     } else {
       final currencySpace = currencyHasSpace ? ' ' : '';
-      prefixCurrency =
-          '${isPrefixCurrency ? '$currencySymbol$currencySpace' : ""}';
-      suffixCurrency =
-          '${isPrefixCurrency ? "" : '$currencySpace$currencySymbol'}';
+      prefixCurrency = isPrefixCurrency ? '$currencySymbol$currencySpace' : "";
+      suffixCurrency = isPrefixCurrency ? "" : '$currencySpace$currencySymbol';
     }
 
     if (money.isNegative) {
@@ -194,7 +191,8 @@ class MoneyFormatter {
     }
 
     try {
-      var dec = Decimal.parse(wholeNumber) / Decimal.fromInt(10).pow(scale);
+      var dec = (Decimal.parse(wholeNumber) / Decimal.fromInt(10).pow(scale))
+          .toDecimal();
       if (isNegative) {
         dec = -dec;
       }

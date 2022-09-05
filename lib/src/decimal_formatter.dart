@@ -1,6 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
-import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 
@@ -47,7 +46,7 @@ class DecimalFormatter {
 
   String _findGroupsSeparator() => _nfUser.symbols.GROUP_SEP;
 
-  int _max_int(int first, int second) => first > second ? first : second;
+  int _maxInt(int first, int second) => first > second ? first : second;
 
   String formatDecimal(Decimal decimal,
       {bool? showGroups,
@@ -71,7 +70,7 @@ class DecimalFormatter {
 
     int scale;
     scale = optimizedFraction
-        ? _max_int(decimal.hasFinitePrecision ? decimal.scale : 10,
+        ? _maxInt(decimal.hasFinitePrecision ? decimal.scale : 10,
             _nfUser.minimumFractionDigits)
         : _nfUser.maximumFractionDigits;
     ret = decimal.abs().toStringAsFixed(scale);
@@ -137,7 +136,8 @@ class DecimalFormatter {
     }
 
     try {
-      decimal = Decimal.parse(wholeNumber) / decimal10.pow(scale);
+      decimal = (Decimal.parse(wholeNumber) / decimal10.pow(scale))
+          .toDecimal(scaleOnInfinitePrecision: scale);
       if (isNegative) {
         decimal = -decimal;
       }

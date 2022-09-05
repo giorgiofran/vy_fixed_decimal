@@ -1,6 +1,7 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
-import 'package:decimal/decimal.dart';
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
 import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 
@@ -10,7 +11,7 @@ Money money(String value, String countryLocale, {RoundingType? rounding}) =>
 double round(double value, [double increment = 1.0]) {
   var val = Decimal.parse(value.toString());
   final inc = Decimal.parse(increment.toString());
-  val /= inc;
+  val = (val / inc).toDecimal();
   val = val.round();
   val *= inc;
   return val.toDouble();
@@ -333,7 +334,7 @@ void main() {
       expect(money('100,0000001', locale).precision, equals(3));
       expect(money('100,000000000000000000000000000001', locale).precision,
           equals(3));
-      expect((money('1', locale) / money('3', locale)).precision, equals(2));
+      expect((money('1', locale) / money('3', locale)).precision, equals(3));
     });
     test('scale', () {
       expect(money('100', locale).scale, equals(0));

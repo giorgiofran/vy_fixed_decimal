@@ -1,6 +1,7 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
-import 'package:decimal/decimal.dart';
+// ignore_for_file: avoid_function_literals_in_foreach_calls
+
 import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 

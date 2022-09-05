@@ -3,8 +3,12 @@
 import 'package:rational/rational.dart';
 import 'package:test/test.dart';
 
+extension RationalExt on Rational {
+  bool get isNegative => signum < 0;
+}
+
 Rational mod(Rational one, Rational other) {
-  final  remainder = one.remainder(other);
+  final remainder = one.remainder(other);
   if (remainder == Rational(BigInt.from(0))) {
     return remainder;
   }

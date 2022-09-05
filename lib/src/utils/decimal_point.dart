@@ -1,4 +1,3 @@
-import 'package:decimal/decimal.dart';
 import 'package:quiver/core.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 

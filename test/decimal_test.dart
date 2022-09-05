@@ -1,8 +1,6 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
-import 'package:decimal/decimal.dart';
 import 'package:test/test.dart';
-import 'package:vy_fixed_decimal/src/decimal_formatter.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 
 void main() {
@@ -45,7 +43,8 @@ void main() {
           '2.517,480');
     });
     test('formatting  ...', () {
-      final decimal = decimal1 / Decimal.parse('3');
+      final decimal = (Decimal.one / Decimal.parse('3'))
+          .toDecimal(scaleOnInfinitePrecision: 10);
 
       final df = DecimalFormatter('it_IT');
       expect(
@@ -125,8 +124,11 @@ void main() {
       result =
           df.formatDecimal(decimal, showGroups: false, optimizedFraction: true);
       expect(df.parse(result), decimal);
-      result = df.formatDecimal(decimal1 / Decimal.fromInt(3),
-          showGroups: false, optimizedFraction: false);
+      result = df.formatDecimal(
+          (Decimal.one / Decimal.fromInt(3))
+              .toDecimal(scaleOnInfinitePrecision: 10),
+          showGroups: false,
+          optimizedFraction: false);
       expect(df.parse(result), Decimal.parse('0.333'));
     });
     test('parsing negative double', () {

@@ -111,7 +111,7 @@ class Money implements Comparable<Money> {
 
   Money duplicate() => Money.fromDecimal(decimal, _countryLocale);
 
-  static int _int_min(int first, int second) => first < second ? first : second;
+  static int _intMin(int first, int second) => first < second ? first : second;
 
   static Object _fixedDecimalWhenPossible(Object obj) {
     if (obj is Money) {
@@ -159,7 +159,7 @@ class Money implements Comparable<Money> {
       return Money.fromDecimal(addend, countryLocale);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -192,11 +192,11 @@ class Money implements Comparable<Money> {
     }
 
     return Money.fromFixedDecimal(
-        FixedDecimal._resolveOperation(
+        FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(augendObj),
             _fixedDecimalWhenPossible(addendObj),
             () => augend + addend,
-            _defineMinimumValue,
+            defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
         countryLocale);
@@ -228,7 +228,7 @@ class Money implements Comparable<Money> {
       return Money.fromDecimal(subtrahend, countryLocale);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -251,7 +251,7 @@ class Money implements Comparable<Money> {
       if (minuendMin == null) {
         if (subtrahendMin == null) {
           return DecimalExtension.minimumValueFromScale(
-              _int_min((minuend - subtrahend).scale, 10));
+              _intMin((minuend - subtrahend).scale, 10));
         }
         return subtrahendMin;
       } else {
@@ -265,11 +265,11 @@ class Money implements Comparable<Money> {
     }
 
     return Money.fromFixedDecimal(
-        FixedDecimal._resolveOperation(
+        FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(minuendObj),
             _fixedDecimalWhenPossible(subtrahendObj),
             () => minuend - subtrahend,
-            _defineMinimumValue,
+            defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
         countryLocale);
@@ -298,7 +298,7 @@ class Money implements Comparable<Money> {
       return Money.fromDecimal(multiplier, countryLocale);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -319,25 +319,25 @@ class Money implements Comparable<Money> {
       if (multiplicandMin == null) {
         if (multiplierMin == null) {
           return DecimalExtension.minimumValueFromScale(
-              _int_min((multiplicand * multiplier).scale, 10));
+              _intMin((multiplicand * multiplier).scale, 10));
         }
         return multiplierMin;
       } else {
         if (multiplierMin == null) {
           return multiplicandMin;
         } else {
-          return multiplicandMin.min(multiplierMin)
-              /*DecimalExtension.min(multiplicandMin, multiplierMin)*/;
+          return multiplicandMin.min(
+              multiplierMin) /*DecimalExtension.min(multiplicandMin, multiplierMin)*/;
         }
       }
     }
 
     return Money.fromFixedDecimal(
-        FixedDecimal._resolveOperation(
+        FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(multiplicandObj),
             _fixedDecimalWhenPossible(multiplierObj),
             () => multiplicand * multiplier,
-            _defineMinimumValue,
+            defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
         countryLocale);
@@ -374,7 +374,7 @@ class Money implements Comparable<Money> {
       return Money.fromDecimal(divisor, countryLocale);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -393,25 +393,25 @@ class Money implements Comparable<Money> {
       if (dividendMin == null) {
         if (divisorMin == null) {
           return DecimalExtension.minimumValueFromScale(
-              _int_min((_mod(dividend, divisor)).scale, 10));
+              _intMin((_mod(dividend, divisor)).scale, 10));
         }
         return divisorMin;
       } else {
         if (divisorMin == null) {
           return dividendMin;
         } else {
-          return dividendMin.min(divisorMin)
-              /*DecimalExtension.min(dividendMin, divisorMin)*/;
+          return dividendMin.min(
+              divisorMin) /*DecimalExtension.min(dividendMin, divisorMin)*/;
         }
       }
     }
 
     return Money.fromFixedDecimal(
-        FixedDecimal._resolveOperation(
+        FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(dividendObj),
             _fixedDecimalWhenPossible(divisorObj),
             () => FixedDecimal._mod(dividend, divisor),
-            _defineMinimumValue,
+            defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
         countryLocale);
@@ -440,7 +440,7 @@ class Money implements Comparable<Money> {
       return Money.fromDecimal(divisor, countryLocale);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -459,25 +459,25 @@ class Money implements Comparable<Money> {
       if (dividendMin == null) {
         if (divisorMin == null) {
           return DecimalExtension.minimumValueFromScale(
-              _int_min((dividend / divisor).scale, 10));
+              _intMin((dividend / divisor).toDecimal().scale, 10));
         }
         return divisorMin;
       } else {
         if (divisorMin == null) {
           return dividendMin;
         } else {
-          return dividendMin.min(divisorMin)
-              /*DecimalExtension.min(dividendMin, divisorMin)*/;
+          return dividendMin.min(
+              divisorMin) /*DecimalExtension.min(dividendMin, divisorMin)*/;
         }
       }
     }
 
     return Money.fromFixedDecimal(
-        FixedDecimal._resolveOperation(
+        FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(dividendObj),
             _fixedDecimalWhenPossible(divisorObj),
-            () => dividend / divisor,
-            _defineMinimumValue,
+            () => (dividend / divisor).toDecimal(scaleOnInfinitePrecision: 10),
+            defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
         countryLocale);
@@ -509,7 +509,7 @@ class Money implements Comparable<Money> {
       return Money.fromDecimal(divisor, countryLocale);
     }
 
-    Decimal _defineMinimumValue() {
+    Decimal defineMinimumValue() {
       if (minimumValue != null) {
         return minimumValue;
       }
@@ -517,11 +517,11 @@ class Money implements Comparable<Money> {
     }
 
     return Money.fromFixedDecimal(
-        FixedDecimal._resolveOperation(
+        FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(dividendObj),
             _fixedDecimalWhenPossible(divisorObj),
-            () => dividend ~/ divisor,
-            _defineMinimumValue,
+            () => Decimal.fromBigInt(dividend ~/ divisor),
+            defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
         countryLocale);
@@ -595,23 +595,23 @@ class Money implements Comparable<Money> {
   ///  [:(3.5).round() == 4:] and [:(-3.5).round() == -4:].
   ///
   /// The result is a double.
-  double roundToDouble() => decimal.roundToDouble();
+  double roundToDouble() => decimal.round().toDouble();
 
   /// Returns the greatest integer value no greater than `this`.
   ///
   /// The result is a double.
-  double floorToDouble() => decimal.floorToDouble();
+  double floorToDouble() => decimal.floor().toDouble();
 
   /// Returns the least integer value no smaller than `this`.
   ///
   /// The result is a double.
-  double ceilToDouble() => decimal.ceilToDouble();
+  double ceilToDouble() => decimal.ceil().toDouble();
 
   /// Returns the integer obtained by discarding any fractional
   /// digits from `this`.
   ///
   /// The result is a double.
-  double truncateToDouble() => decimal.truncateToDouble();
+  double truncateToDouble() => decimal.truncate().toDouble();
 
   /// Clamps this to be in the range [lowerLimit]-[upperLimit]. The comparison
   /// is done using [compareTo] and therefore takes [:-0.0:] into account.
@@ -619,8 +619,13 @@ class Money implements Comparable<Money> {
       decimal.clamp(lowerLimit.decimal, upperLimit.decimal), userLocale,
       rounding: rounding);
 
-  /// Truncates this [num] to an integer and returns the result as an [int]. */
-  int toInt() => decimal.toInt();
+  /// Truncates this [num] to an integer and returns the result as an [int]. 
+   /// If the number does not fit, clamps to the max (or min) integer.
+  ///
+  /// **Warning:** the clamping behaves differently between the web and
+  /// native platforms due to the differences in integer precision.
+  ///
+  int toInt() => decimal.toBigInt().toInt();
 
   /// Return this [num] as a [double].
   ///
@@ -657,7 +662,7 @@ class Money implements Comparable<Money> {
   /// Converts a [num] to a string in decimal exponential notation with
   /// [fractionDigits] digits after the decimal point.
   String toStringAsExponential([int? fractionDigits]) =>
-      decimal.toStringAsExponential(fractionDigits);
+      decimal.toStringAsExponential(fractionDigits ?? scale);
 
   /// Converts a [num] to a string representation with [precision]
   /// significant digits.

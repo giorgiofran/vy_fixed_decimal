@@ -1,4 +1,3 @@
-import 'package:decimal/decimal.dart';
 import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
 

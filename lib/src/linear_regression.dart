@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'utils/decimal_point.dart';
+import 'dart:math' as math;
 
 /// Calculates a linear regression based on a list of DecimalPoints
 class LinearRegression {
@@ -14,9 +15,10 @@ class LinearRegression {
   Decimal? _deltaX2, _deltaY2, _deltaProduct;
 
   Decimal get a => _a ??= meanPoint.y - meanPoint.x * b;
-  Decimal get b => _b ??= meanDeltaProduct / meanDeltaX2;
-  Decimal get coefficientOfDetermination =>
-      _coefficient ??= meanDeltaProduct.pow(2) / (meanDeltaX2 * meanDeltaY2);
+  Decimal get b => _b ??= (meanDeltaProduct / meanDeltaX2).toDecimal();
+  Decimal get coefficientOfDetermination => _coefficient ??=
+      (meanDeltaProduct.pow(2) / (meanDeltaX2 * meanDeltaY2)).toDecimal(
+          scaleOnInfinitePrecision: math.max<int>(meanDeltaProduct.scale, 10));
   Decimal get meanDeltaX2 {
     if (_deltaX2 == null) {
       _deltaProduct = calculateDeltaProduct();
@@ -50,7 +52,8 @@ class LinearRegression {
       totalY += point.y;
     }
     final count = Decimal.fromInt(points.length);
-    return DecimalPoint(totalX / count, totalY / count);
+    return DecimalPoint(
+        (totalX / count).toDecimal(), (totalY / count).toDecimal());
   }
 
   Decimal calculateDeltaProduct() {
@@ -63,9 +66,9 @@ class LinearRegression {
       totalProduct += (p.x - meanPoint.x) * (p.y - meanPoint.y);
     }
     final count = Decimal.fromInt(points.length);
-    _deltaX2 = totalX / count;
-    _deltaY2 = totalY / count;
-    return totalProduct / count;
+    _deltaX2 = (totalX / count).toDecimal();
+    _deltaY2 = (totalY / count).toDecimal();
+    return (totalProduct / count).toDecimal();
   }
 
   /*  void calculateLineCoefficients() {
