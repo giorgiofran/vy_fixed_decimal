@@ -228,7 +228,7 @@ extension DecimalExtension on Decimal {
   /// deals also with scaleOnInfinitePrecision
   Decimal power(int exponent, {int? scaleOnInfinitePrecision}) =>
       exponent.isNegative
-          ? Decimal.one.safeDivBy(power(-exponent),
+          ? Decimal.one.safeDivBy(pow(-exponent),
               scaleOnInfinitePrecision: scaleOnInfinitePrecision)
-          : power(exponent);
+          : pow(exponent);
 }
