@@ -3,7 +3,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:vy_fixed_decimal/src/fixed_decimal.dart';
 
-
 void main() {
   var fixed = FixedDecimal.fromInt(5);
   var second = FixedDecimal.fromInt(3);

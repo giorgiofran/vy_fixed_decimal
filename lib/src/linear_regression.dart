@@ -51,8 +51,7 @@ class LinearRegression {
       totalY += point.y;
     }
     final count = Decimal.fromInt(points.length);
-    return DecimalPoint(
-        totalX.safeDivBy(count), totalY.safeDivBy(count));
+    return DecimalPoint(totalX.safeDivBy(count), totalY.safeDivBy(count));
   }
 
   Decimal calculateDeltaProduct() {

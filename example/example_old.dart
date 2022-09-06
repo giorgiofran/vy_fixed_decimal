@@ -58,7 +58,7 @@ void main() {
   print('Value ok? $valueOk');
   print('String ok? ${t4.toString() == '3.6934'}');
 
-  final  t42 = test.add(fd_1_3334,
+  final t42 = test.add(fd_1_3334,
       policy: ScalingPolicy.biggerScale, rounding: RoundingType.floor);
 
   print('******* $t42 ******');

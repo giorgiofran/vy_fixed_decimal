@@ -216,16 +216,10 @@ void main() {
       expect(fixed('1') >= fixed('1.1'), equals(false));
       expect(fixed('1') >= fixed('0.9'), equals(true));
     });
-    test('get isNaN', () {
-      expect(fixed('1').isNaN, equals(false));
-    });
     test('get isNegative', () {
       expect(fixed('-1').isNegative, equals(true));
       expect(fixed('0').isNegative, equals(false));
       expect(fixed('1').isNegative, equals(false));
-    });
-    test('get isInfinite', () {
-      expect(fixed('1').isInfinite, equals(false));
     });
     test('abs()', () {
       expect((fixed('-1.49').abs()).toString(), equals('1.49'));
@@ -312,12 +306,14 @@ void main() {
       expect((fixed('1') / fixed('3')).scale, equals(0));
     });
     test('toStringAsFixed(int fractionDigits)', () {
-     /*  expect(fixed(('2.5'), scale: 0).toStringAsFixed(0),
+      /*  expect(fixed(('2.5'), scale: 0).toStringAsFixed(0),
           equals((2.5).toStringAsFixed(0))); */
       [0, 1, 23, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((num n) {
         [0, 1, 5, 10].forEach((p) {
           print('n: $n, p: $p');
-          expect(fixed(n.toString(), scale: p, rounding: RoundingType.halfUp).toStringAsFixed(p),
+          expect(
+              fixed(n.toString(), scale: p, rounding: RoundingType.halfUp)
+                  .toStringAsFixed(p),
               equals(n.toStringAsFixed(p)));
         });
       });

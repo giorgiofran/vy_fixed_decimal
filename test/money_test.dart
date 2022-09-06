@@ -242,16 +242,10 @@ void main() {
       expect(money('1', locale) >= money('1,1', locale), equals(false));
       expect(money('1', locale) >= money('0,9', locale), equals(true));
     });
-    test('get isNaN', () {
-      expect(money('1', locale).isNaN, equals(false));
-    });
     test('get isNegative', () {
       expect(money('-1', locale).isNegative, equals(true));
       expect(money('0', locale).isNegative, equals(false));
       expect(money('1', locale).isNegative, equals(false));
-    });
-    test('get isInfinite', () {
-      expect(money('1', locale).isInfinite, equals(false));
     });
     test('abs()', () {
       expect((money('-1,49', locale).abs()).toString(), equals('1,49 EUR'));
@@ -373,7 +367,7 @@ void main() {
     }, skip: true); // At present decimal returns 20 instead of 2e+1
 
     test('Explicit currency name', () {
-      var fix = Money.parse('1000000.32',  'it_IT', userLocale: 'en_US');
+      var fix = Money.parse('1000000.32', 'it_IT', userLocale: 'en_US');
       var formatted = fix.formattedCurrency(userLocale: 'en_US', symbol: '€');
       expect(formatted, '1,000,000.32 €');
       fix = Money.parse('1000000.32', 'en_US');
@@ -383,7 +377,7 @@ void main() {
       formatted = fix.formattedCurrency(userLocale: 'en_US', symbol: r'$');
       expect(formatted, r'$1,000,000.32');
 
-      fix = Money.parse('1000000.32','en_US', userLocale: 'de_CH');
+      fix = Money.parse('1000000.32', 'en_US', userLocale: 'de_CH');
       formatted = fix.formattedCurrency(userLocale: 'de_CH', symbol: r'$');
       //var nbsp = new String.fromCharCode(0xa0);
       expect(formatted, r'$1’000’000.32');

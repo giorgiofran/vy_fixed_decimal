@@ -151,13 +151,8 @@ class Money implements Comparable<Money> {
       Object augendObj, Object addendObj, String countryLocale,
       {Decimal? minimumValue, RoundingType? rounding}) {
     final augend = DecimalExtension.decimalFromObject(augendObj);
-    if (augend.isNaN || augend.isInfinite) {
-      return Money.fromDecimal(augend, countryLocale);
-    }
+
     final addend = DecimalExtension.decimalFromObject(addendObj);
-    if (addend.isNaN || addend.isInfinite) {
-      return Money.fromDecimal(addend, countryLocale);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -219,14 +214,7 @@ class Money implements Comparable<Money> {
       {Decimal? minimumValue, RoundingType? rounding}) {
     final minuend = DecimalExtension.decimalFromObject(minuendObj);
 
-    if (minuend.isNaN || minuend.isInfinite) {
-      return Money.fromDecimal(minuend, countryLocale);
-    }
     final subtrahend = DecimalExtension.decimalFromObject(subtrahendObj);
-
-    if (subtrahend.isNaN || subtrahend.isInfinite) {
-      return Money.fromDecimal(subtrahend, countryLocale);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -289,14 +277,7 @@ class Money implements Comparable<Money> {
       {Decimal? minimumValue, RoundingType? rounding}) {
     final multiplicand = DecimalExtension.decimalFromObject(multiplicandObj);
 
-    if (multiplicand.isNaN || multiplicand.isInfinite) {
-      return Money.fromDecimal(multiplicand, countryLocale);
-    }
     final multiplier = DecimalExtension.decimalFromObject(multiplierObj);
-
-    if (multiplier.isNaN || multiplier.isInfinite) {
-      return Money.fromDecimal(multiplier, countryLocale);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -365,14 +346,7 @@ class Money implements Comparable<Money> {
       {Decimal? minimumValue, RoundingType? rounding}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
 
-    if (dividend.isNaN || dividend.isInfinite) {
-      return Money.fromDecimal(dividend, countryLocale);
-    }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-
-    if (divisor.isNaN || divisor.isInfinite) {
-      return Money.fromDecimal(divisor, countryLocale);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -431,14 +405,7 @@ class Money implements Comparable<Money> {
       {Decimal? minimumValue, RoundingType? rounding}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
 
-    if (dividend.isNaN || dividend.isInfinite) {
-      return Money.fromDecimal(dividend, countryLocale);
-    }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-
-    if (divisor.isNaN || divisor.isInfinite) {
-      return Money.fromDecimal(divisor, countryLocale);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -503,14 +470,7 @@ class Money implements Comparable<Money> {
       {Decimal? minimumValue, RoundingType? rounding}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
 
-    if (dividend.isNaN || dividend.isInfinite) {
-      return Money.fromDecimal(dividend, countryLocale);
-    }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-
-    if (divisor.isNaN || divisor.isInfinite) {
-      return Money.fromDecimal(divisor, countryLocale);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -551,11 +511,7 @@ class Money implements Comparable<Money> {
   /// Relational greater than or equal operator.
   bool operator >=(Money other) => decimal >= other.decimal;
 
-  bool get isNaN => decimal.isNaN;
-
   bool get isNegative => decimal.isNegative;
-
-  bool get isInfinite => decimal.isInfinite;
 
   /// Returns the absolute value of this [num].
   Money abs() =>

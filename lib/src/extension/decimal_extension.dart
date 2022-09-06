@@ -35,17 +35,11 @@ extension DecimalExtension on Decimal {
   /// Having a finite precision means that the number can be exactly represented
   /// as decimal with a finite number of fractional digits.
   bool get hasFinitePrecision => toRational().hasFinitePrecision;
-  bool get isInfinite => !hasFinitePrecision;
 
   /// IsNegative
   ///
   /// Returns `true` if this [Decimal] is lesser than zero.
   bool get isNegative => signum < 0;
-
-  /// IsNaN
-  ///
-  /// Returns always `false`, as a [Decimal] is always a valid number.
-  bool get isNaN => false;
 
   static Decimal minimumValueFromScale(int scale) {
     if (_dividers[scale] == null) {
@@ -96,10 +90,7 @@ extension DecimalExtension on Decimal {
     }
     var decimal = checkDecimal ?? Decimal.one;
     final originalValue = decimalFromObject(objValue);
-    if (/* originalValue == null || */
-        originalValue.isNaN || originalValue.isInfinite) {
-      return originalValue;
-    }
+
     /* var value =
         (originalValue / decimal).toDecimal(scaleOnInfinitePrecision: scale); */
     var value = originalValue.safeDivBy(decimal);
@@ -235,9 +226,6 @@ extension DecimalExtension on Decimal {
   Decimal roundAwayFromZero() => isNegative ? floor() : ceil();
 
   Decimal fractionalPart(FractionalPartCriteria criteria) {
-    if (isNaN || isInfinite) {
-      return this;
-    }
     if (!isNegative) {
       return this - floor();
     }
@@ -257,7 +245,7 @@ extension DecimalExtension on Decimal {
     if (r.hasFinitePrecision) {
       return r.toDecimal();
     }
-    scaleOnInfinitePrecision ??= 10;
+    scaleOnInfinitePrecision ??= math.max<int>(scale, other.scale) + 10;
     return r.toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
   }
 }

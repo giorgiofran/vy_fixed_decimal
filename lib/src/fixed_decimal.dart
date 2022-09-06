@@ -112,9 +112,6 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           minimumValue: _minimumValue, rounding: _rounding, policy: _policy);
 
   Decimal _fractionalPart(Decimal value, FractionalPartCriteria criteria) {
-    if (/* value == null || */ value.isNaN || value.isInfinite) {
-      return value;
-    }
     if (!value.isNegative) {
       return value - value.floor();
     }
@@ -418,16 +415,11 @@ class FixedDecimal implements Comparable<FixedDecimal> {
     /* if (augend == null) {
       return null;
     } */
-    if (augend.isNaN || augend.isInfinite) {
-      return FixedDecimal.fromDecimal(augend);
-    }
+
     final addend = DecimalExtension.decimalFromObject(addendObj);
     /* if (addend == null) {
       return null;
     } */
-    if (addend.isNaN || addend.isInfinite) {
-      return FixedDecimal.fromDecimal(addend);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -489,16 +481,11 @@ class FixedDecimal implements Comparable<FixedDecimal> {
     /* if (minuend == null) {
       return null;
     } */
-    if (minuend.isNaN || minuend.isInfinite) {
-      return FixedDecimal.fromDecimal(minuend);
-    }
+
     final subtrahend = DecimalExtension.decimalFromObject(subtrahendObj);
     /* if (subtrahend == null) {
       return null;
     } */
-    if (subtrahend.isNaN || subtrahend.isInfinite) {
-      return FixedDecimal.fromDecimal(subtrahend);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -558,14 +545,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       ScalingPolicy? policy}) {
     final multiplicand = DecimalExtension.decimalFromObject(multiplicandObj);
 
-    if (multiplicand.isNaN || multiplicand.isInfinite) {
-      return FixedDecimal.fromDecimal(multiplicand);
-    }
     final multiplier = DecimalExtension.decimalFromObject(multiplierObj);
-
-    if (multiplier.isNaN || multiplier.isInfinite) {
-      return FixedDecimal.fromDecimal(multiplier);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -630,14 +610,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       ScalingPolicy? policy}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
 
-    if (dividend.isNaN || dividend.isInfinite) {
-      return FixedDecimal.fromDecimal(dividend);
-    }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-
-    if (divisor.isNaN || divisor.isInfinite) {
-      return FixedDecimal.fromDecimal(divisor);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -693,14 +666,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       ScalingPolicy? policy}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
 
-    if (dividend.isNaN || dividend.isInfinite) {
-      return FixedDecimal.fromDecimal(dividend);
-    }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-
-    if (divisor.isNaN || divisor.isInfinite) {
-      return FixedDecimal.fromDecimal(divisor);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -766,14 +732,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
       ScalingPolicy? policy}) {
     final dividend = DecimalExtension.decimalFromObject(dividendObj);
 
-    if (dividend.isNaN || dividend.isInfinite) {
-      return FixedDecimal.fromDecimal(dividend);
-    }
     final divisor = DecimalExtension.decimalFromObject(divisorObj);
-
-    if (divisor.isNaN || divisor.isInfinite) {
-      return FixedDecimal.fromDecimal(divisor);
-    }
 
     Decimal defineMinimumValue() {
       if (minimumValue != null) {
@@ -811,11 +770,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   /// Relational greater than or equal operator. */
   bool operator >=(FixedDecimal other) => _decimal >= other._decimal;
 
-  bool get isNaN => _decimal.isNaN;
-
   bool get isNegative => _decimal.isNegative;
-
-  bool get isInfinite => _decimal.isInfinite;
 
   /// Returns the absolute value of this [num]. */
   FixedDecimal abs() => FixedDecimal.fromDecimal(_decimal.abs(),
