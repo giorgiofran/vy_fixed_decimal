@@ -135,7 +135,7 @@ class DecimalFormatter {
     }
 
     try {
-      decimal = Decimal.parse(wholeNumber).safeDivBy(decimal10.power(scale));
+      decimal = Decimal.parse(wholeNumber).safeDivBy(Decimal.ten.power(scale));
       if (isNegative) {
         decimal = -decimal;
       }

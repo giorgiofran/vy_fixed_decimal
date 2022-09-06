@@ -9,9 +9,9 @@ import '../enums/fractional_part_criteria.dart';
 import '../fixed_decimal.dart';
 
 //Decimal decimal0 = Decimal.zero;
-Decimal decimal1 = Decimal.one;
+// Decimal decimal1 = Decimal.one;
 Decimal decimal2 = Decimal.fromInt(2);
-Decimal decimal10 = Decimal.parse('10');
+//Decimal decimal10 = Decimal.parse('10');
 Decimal decimal100 = Decimal.parse('100');
 
 Decimal decMinus2 = Decimal.fromInt(-2);
@@ -22,7 +22,7 @@ Decimal decHundredths = Decimal.parse('0.01');
 
 final Map<int, Decimal> _dividers = {
   -2: decimal100,
-  -1: decimal10,
+  -1: Decimal.ten,
   0: Decimal.one,
   1: decTenths,
   2: decHundredths,
@@ -34,19 +34,47 @@ extension DecimalExtension on Decimal {
   /// Returns `true` if this [Decimal] is lesser than zero.
   bool get isNegative => signum < 0;
 
+  bool get isZero => this == Decimal.zero;
+  bool get isEven => truncate() % decimal2 == Decimal.zero;
+
+  Decimal min(Decimal other) => this < other ? this : other;
+  Decimal max(Decimal other) => this > other ? this : other;
+
+  Decimal roundAwayFromZero() => isNegative ? floor() : ceil();
+
   static Decimal minimumValueFromScale(int scale) {
     if (_dividers[scale] == null) {
-      _dividers[scale] = decimal10.power(-scale);
+      _dividers[scale] = Decimal.ten.power(-scale);
     }
     return _dividers[scale]!;
   }
 
   static int scaleFromMinimumValue(Decimal minimumValue) => minimumValue.scale;
 
+  Decimal fractionalPart(FractionalPartCriteria criteria) {
+    if (!isNegative) {
+      return this - floor();
+    }
+    switch (criteria) {
+      case FractionalPartCriteria.floor:
+        return this - floor();
+      case FractionalPartCriteria.absolute:
+        return abs() - abs().floor();
+      case FractionalPartCriteria.ceil:
+        return this - ceil();
+    }
+  }
+
+  Decimal safeDivBy(Decimal other, {int? scaleOnInfinitePrecision}) {
+    Rational r = this / other;
+    if (r.hasFinitePrecision) {
+      return r.toDecimal();
+    }
+    scaleOnInfinitePrecision ??= math.max<int>(scale, other.scale) + 10;
+    return r.toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
+  }
+
   static Decimal decimalFromObject(Object value, {int fractiondigits = 10}) {
-    /*  if (value == null) {
-      return null;
-    } */
     Decimal decimal;
     if (value is Decimal) {
       decimal = value;
@@ -84,8 +112,6 @@ extension DecimalExtension on Decimal {
     var decimal = checkDecimal ?? Decimal.one;
     final originalValue = decimalFromObject(objValue);
 
-    /* var value =
-        (originalValue / decimal).toDecimal(scaleOnInfinitePrecision: scale); */
     var value = originalValue.safeDivBy(decimal);
     Decimal fraPart;
     switch (locRounding) {
@@ -199,43 +225,10 @@ extension DecimalExtension on Decimal {
     return value;
   }
 
-  String toJson() => toString();
-  bool get isZero => this == Decimal.zero;
-  bool get isEven => truncate() % decimal2 == Decimal.zero;
-
   /// deals also with scaleOnInfinitePrecision
   Decimal power(int exponent, {int? scaleOnInfinitePrecision}) =>
       exponent.isNegative
           ? Decimal.one.safeDivBy(power(-exponent),
               scaleOnInfinitePrecision: scaleOnInfinitePrecision)
           : power(exponent);
-
-  Decimal min(Decimal other) => this < other ? this : other;
-  Decimal max(Decimal other) => this > other ? this : other;
-
-  Decimal roundAwayFromZero() => isNegative ? floor() : ceil();
-
-  Decimal fractionalPart(FractionalPartCriteria criteria) {
-    if (!isNegative) {
-      return this - floor();
-    }
-    switch (criteria) {
-      case FractionalPartCriteria.floor:
-        return this - floor();
-      case FractionalPartCriteria.absolute:
-        return abs() - abs().floor();
-      case FractionalPartCriteria.ceil:
-        return this - ceil();
-    }
-    //return this;
-  }
-
-  Decimal safeDivBy(Decimal other, {int? scaleOnInfinitePrecision}) {
-    Rational r = this / other;
-    if (r.hasFinitePrecision) {
-      return r.toDecimal();
-    }
-    scaleOnInfinitePrecision ??= math.max<int>(scale, other.scale) + 10;
-    return r.toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
-  }
 }
