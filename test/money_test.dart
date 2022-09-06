@@ -11,7 +11,7 @@ Money money(String value, String countryLocale, {RoundingType? rounding}) =>
 double round(double value, [double increment = 1.0]) {
   var val = Decimal.parse(value.toString());
   final inc = Decimal.parse(increment.toString());
-  val = (val / inc).toDecimal();
+  val = val.safeDivBy(inc);
   val = val.round();
   val *= inc;
   return val.toDouble();

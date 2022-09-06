@@ -2,6 +2,7 @@
 
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
+import 'package:rational/rational.dart';
 import 'package:vy_fixed_decimal/src/enums/rounding_type.dart';
 
 import '../enums/fractional_part_criteria.dart';
@@ -53,7 +54,9 @@ extension DecimalExtension on Decimal {
     return _dividers[scale]!;
   }
 
-  static Decimal decimalFromObject(Object value) {
+  static int scaleFromMinimumValue(Decimal minimumValue) => minimumValue.scale;
+
+  static Decimal decimalFromObject(Object value, {int fractiondigits = 10}) {
     /*  if (value == null) {
       return null;
     } */
@@ -65,11 +68,17 @@ extension DecimalExtension on Decimal {
     } else if (value is Money) {
       decimal = value.decimal;
     } else if (value is double) {
-      decimal = Decimal.parse(value.toStringAsExponential());
+      decimal = Decimal.parse(value.toStringAsExponential(fractiondigits));
     } else if (value is int) {
       decimal = Decimal.fromInt(value);
     } else if (value is String) {
       decimal = Decimal.parse(value);
+    } else if (value is Rational) {
+      if (value.hasFinitePrecision) {
+        decimal = value.toDecimal();
+      } else {
+        decimal = value.toDecimal(scaleOnInfinitePrecision: fractiondigits);
+      }
     } else {
       throw Exception('Unexpected parameter type ${value.runtimeType}');
     }
@@ -91,8 +100,9 @@ extension DecimalExtension on Decimal {
         originalValue.isNaN || originalValue.isInfinite) {
       return originalValue;
     }
-    var value =
-        (originalValue / decimal).toDecimal(scaleOnInfinitePrecision: scale);
+    /* var value =
+        (originalValue / decimal).toDecimal(scaleOnInfinitePrecision: scale); */
+    var value = originalValue.safeDivBy(decimal);
     Decimal fraPart;
     switch (locRounding) {
       case RoundingType.floor:
@@ -209,10 +219,15 @@ extension DecimalExtension on Decimal {
   bool get isZero => this == Decimal.zero;
   bool get isEven => truncate() % decimal2 == Decimal.zero;
   // Accepts also negative exponents
-  Decimal power(int exponent) => exponent.isNegative
+  /*  Decimal power(int exponent) => exponent.isNegative
       ? (Decimal.one / pow(-exponent))
           .toDecimal(scaleOnInfinitePrecision: math.max<int>(scale, 10))
-      : pow(exponent);
+      : pow(exponent); */
+  Decimal power(int exponent, {int? scaleOnInfinitePrecision}) =>
+      exponent.isNegative
+          ? Decimal.one.safeDivBy(pow(-exponent),
+              scaleOnInfinitePrecision: scaleOnInfinitePrecision)
+          : pow(exponent);
 
   Decimal min(Decimal other) => this < other ? this : other;
   Decimal max(Decimal other) => this > other ? this : other;
@@ -235,5 +250,14 @@ extension DecimalExtension on Decimal {
         return this - ceil();
     }
     //return this;
+  }
+
+  Decimal safeDivBy(Decimal other, {int? scaleOnInfinitePrecision}) {
+    Rational r = this / other;
+    if (r.hasFinitePrecision) {
+      return r.toDecimal();
+    }
+    scaleOnInfinitePrecision ??= 10;
+    return r.toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
   }
 }

@@ -716,8 +716,10 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         if (divisorObj is FixedDecimal) {
           return divisorObj._minimumValue;
         } else {
+          /*    return DecimalExtension.minimumValueFromScale(
+              min((dividend / divisor).toDecimal().scale, 10)); */
           return DecimalExtension.minimumValueFromScale(
-              min((dividend / divisor).toDecimal().scale, 10));
+              min(dividend.safeDivBy(divisor).scale, 10));
         }
       }
     }
@@ -725,8 +727,9 @@ class FixedDecimal implements Comparable<FixedDecimal> {
     return resolveOperation(
         dividendObj,
         divisorObj,
-        () => (dividend / divisor)
-            .toDecimal(scaleOnInfinitePrecision: scale ?? 10),
+        /*    () => (dividend / divisor)
+            .toDecimal(scaleOnInfinitePrecision: scale ?? 10), */
+        () => dividend.safeDivBy(divisor),
         defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,

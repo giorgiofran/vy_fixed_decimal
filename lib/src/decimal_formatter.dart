@@ -136,8 +136,9 @@ class DecimalFormatter {
     }
 
     try {
-      decimal = (Decimal.parse(wholeNumber) / decimal10.pow(scale))
-          .toDecimal(scaleOnInfinitePrecision: scale);
+      /*    decimal = (Decimal.parse(wholeNumber) / decimal10.pow(scale))
+          .toDecimal(scaleOnInfinitePrecision: scale); */
+      decimal = Decimal.parse(wholeNumber).safeDivBy(decimal10.pow(scale));
       if (isNegative) {
         decimal = -decimal;
       }

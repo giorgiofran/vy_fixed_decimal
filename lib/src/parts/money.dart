@@ -458,8 +458,10 @@ class Money implements Comparable<Money> {
 
       if (dividendMin == null) {
         if (divisorMin == null) {
+          /*      return DecimalExtension.minimumValueFromScale(
+              _intMin((dividend / divisor).toDecimal().scale, 10)); */
           return DecimalExtension.minimumValueFromScale(
-              _intMin((dividend / divisor).toDecimal().scale, 10));
+              _intMin(dividend.safeDivBy(divisor).scale, 10));
         }
         return divisorMin;
       } else {
@@ -476,7 +478,8 @@ class Money implements Comparable<Money> {
         FixedDecimal.resolveOperation(
             _fixedDecimalWhenPossible(dividendObj),
             _fixedDecimalWhenPossible(divisorObj),
-            () => (dividend / divisor).toDecimal(scaleOnInfinitePrecision: 10),
+            /*    () => (dividend / divisor).toDecimal(scaleOnInfinitePrecision: 10), */
+            () => dividend.safeDivBy(divisor),
             defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
@@ -619,8 +622,8 @@ class Money implements Comparable<Money> {
       decimal.clamp(lowerLimit.decimal, upperLimit.decimal), userLocale,
       rounding: rounding);
 
-  /// Truncates this [num] to an integer and returns the result as an [int]. 
-   /// If the number does not fit, clamps to the max (or min) integer.
+  /// Truncates this [num] to an integer and returns the result as an [int].
+  /// If the number does not fit, clamps to the max (or min) integer.
   ///
   /// **Warning:** the clamping behaves differently between the web and
   /// native platforms due to the differences in integer precision.
