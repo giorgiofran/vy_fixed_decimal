@@ -29,13 +29,6 @@ final Map<int, Decimal> _dividers = {
 };
 
 extension DecimalExtension on Decimal {
-  /// HasFinitePrecision
-  ///
-  /// Returns `true` if this [Decimal] has a finite precision.
-  /// Having a finite precision means that the number can be exactly represented
-  /// as decimal with a finite number of fractional digits.
-  bool get hasFinitePrecision => toRational().hasFinitePrecision;
-
   /// IsNegative
   ///
   /// Returns `true` if this [Decimal] is lesser than zero.
@@ -209,16 +202,13 @@ extension DecimalExtension on Decimal {
   String toJson() => toString();
   bool get isZero => this == Decimal.zero;
   bool get isEven => truncate() % decimal2 == Decimal.zero;
-  // Accepts also negative exponents
-  /*  Decimal power(int exponent) => exponent.isNegative
-      ? (Decimal.one / pow(-exponent))
-          .toDecimal(scaleOnInfinitePrecision: math.max<int>(scale, 10))
-      : pow(exponent); */
+
+  /// deals also with scaleOnInfinitePrecision
   Decimal power(int exponent, {int? scaleOnInfinitePrecision}) =>
       exponent.isNegative
-          ? Decimal.one.safeDivBy(pow(-exponent),
+          ? Decimal.one.safeDivBy(power(-exponent),
               scaleOnInfinitePrecision: scaleOnInfinitePrecision)
-          : pow(exponent);
+          : power(exponent);
 
   Decimal min(Decimal other) => this < other ? this : other;
   Decimal max(Decimal other) => this > other ? this : other;

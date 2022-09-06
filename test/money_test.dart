@@ -306,20 +306,6 @@ void main() {
       expect(money('-2,51', locale).toDouble(), equals(-2.51));
       expect(money('-2', locale).toDouble(), equals(-2.0));
     });
-    test('hasFinitePrecision', () {
-      [
-        money('100', locale),
-        money('100.100', locale),
-        money('1', locale) / money('5', locale),
-        (money('1', locale) / money('3', locale)) * money('3', locale),
-        money('0,00000000000000000000001', locale)
-      ].forEach((Money d) {
-        expect(d.hasFinitePrecision, isTrue);
-      });
-      [money('1', locale) / money('3', locale)].forEach((Money d) {
-        expect(d.hasFinitePrecision, isTrue);
-      });
-    });
     test('precision', () {
       expect(money('100', locale).precision, equals(3));
       expect(money('10000', locale).precision, equals(5));

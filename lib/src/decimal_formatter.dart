@@ -70,8 +70,7 @@ class DecimalFormatter {
 
     int scale;
     scale = optimizedFraction
-        ? _maxInt(decimal.hasFinitePrecision ? decimal.scale : 10,
-            _nfUser.minimumFractionDigits)
+        ? _maxInt(decimal.scale, _nfUser.minimumFractionDigits)
         : _nfUser.maximumFractionDigits;
     ret = decimal.abs().toStringAsFixed(scale);
 
@@ -136,9 +135,7 @@ class DecimalFormatter {
     }
 
     try {
-      /*    decimal = (Decimal.parse(wholeNumber) / decimal10.pow(scale))
-          .toDecimal(scaleOnInfinitePrecision: scale); */
-      decimal = Decimal.parse(wholeNumber).safeDivBy(decimal10.pow(scale));
+      decimal = Decimal.parse(wholeNumber).safeDivBy(decimal10.power(scale));
       if (isNegative) {
         decimal = -decimal;
       }

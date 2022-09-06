@@ -191,8 +191,8 @@ class MoneyFormatter {
     }
 
     try {
-      var dec =
-          Decimal.parse(wholeNumber).safeDivBy(Decimal.fromInt(10).pow(scale));
+      var dec = Decimal.parse(wholeNumber)
+          .safeDivBy(Decimal.fromInt(10).power(scale));
       if (isNegative) {
         dec = -dec;
       }

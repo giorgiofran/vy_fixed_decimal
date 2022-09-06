@@ -25,8 +25,8 @@ void main() {
   test('Pow Test', () {
     expect(dec('3.0').pow(2), dec('9.0'));
     expect(dec('3.0').power(2), dec('9.0'));
-    expect(dec('3.0').power(-2), decimal1.safeDivBy(dec('9.0')));
-    expect(dec('3.0').power(0), decimal1);
+    expect(dec('3.0').power(-2), Decimal.one.safeDivBy(dec('9.0')));
+    expect(dec('3.0').power(0), Decimal.one);
     expect(dec('3.0').power(12), dec('531441'));
     expect(dec('141.0').pow(7), dec('1107984764452581'));
     expect(dec('141').power(7), dec('1107984764452581'));

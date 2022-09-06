@@ -271,20 +271,6 @@ void main() {
       expect(fixed('-2.51').toDouble(), equals(-2.51));
       expect(fixed('-2').toDouble(), equals(-2.0));
     });
-    test('hasFinitePrecision', () {
-      [
-        fixed('100'),
-        fixed('100.100'),
-        fixed('1') / fixed('5'),
-        (fixed('1') / fixed('3')) * fixed('3'),
-        fixed('0.00000000000000000000001')
-      ].forEach((FixedDecimal d) {
-        expect(d.hasFinitePrecision, isTrue);
-      });
-      [fixed('1', scale: 10) / fixed('3', scale: 10)].forEach((FixedDecimal d) {
-        expect(d.hasFinitePrecision, isTrue);
-      });
-    });
     test('precision', () {
       expect(fixed('100').precision, equals(3));
       expect(fixed('10000').precision, equals(5));

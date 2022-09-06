@@ -593,9 +593,6 @@ class Money implements Comparable<Money> {
   /// approximation may be infinite.
   double toDouble() => decimal.toDouble();
 
-  /// Inspect if this [num] has a finite precision.
-  bool get hasFinitePrecision => decimal.hasFinitePrecision;
-
   /// The precision of this [num].
   ///
   /// The sum of the number of digits before and after

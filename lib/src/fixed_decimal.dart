@@ -50,14 +50,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
     if (minimumValue == null && scale != null) {
       minimumValue = DecimalExtension.minimumValueFromScale(scale);
     }
-    if (minimumValue == null) {
-      if (decimal.hasFinitePrecision) {
-        minimumValue =
-            DecimalExtension.minimumValueFromScale(min<int>(decimal.scale, 10));
-      } else {
-        minimumValue = DecimalExtension.minimumValueFromScale(10);
-      }
-    }
+    minimumValue ??= DecimalExtension.minimumValueFromScale(decimal.scale);
     _minimumValue = minimumValue;
     //_rounding = rounding ?? RoundingType.halfToEven;
     //_policy = policy ?? ScalingPolicy.adjust;
@@ -854,9 +847,6 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   /// approximation is returned. For numerically large integers, the
   /// approximation may be infinite.
   double toDouble() => _decimal.toDouble();
-
-  /// Inspect if this [num] has a finite precision.
-  bool get hasFinitePrecision => _decimal.hasFinitePrecision;
 
   /// The precision of this [num].
   ///
