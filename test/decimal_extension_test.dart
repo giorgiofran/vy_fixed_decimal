@@ -1,5 +1,6 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
+import 'package:rational/rational.dart';
 import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/src/linear_regression.dart';
 import 'package:vy_fixed_decimal/src/utils/decimal_point.dart';
@@ -23,17 +24,16 @@ void main() {
   });
 
   test('Pow Test', () {
-    expect(dec('3.0').pow(2), dec('9.0'));
     expect(dec('3.0').power(2), dec('9.0'));
     expect(dec('3.0').power(-2), Decimal.one.safeDivBy(dec('9.0')));
     expect(dec('3.0').power(0), Decimal.one);
     expect(dec('3.0').power(12), dec('531441'));
-    expect(dec('141.0').pow(7), dec('1107984764452581'));
     expect(dec('141').power(7), dec('1107984764452581'));
     expect(dec('20').power(-22),
         dec('0.00000000000000000000000000002384185791015625'));
-    /* expect(Decimal.fromInt(3).pow(-2), dec('0.1111111111'),
-        skip: 'To be checked with the next version of Decimal'); */
+    expect(dec('3.0').pow(2), Rational.fromInt(9));
+    expect(dec('141.0').pow(7), Rational.parse('1107984764452581'));
+    expect(Decimal.fromInt(3).pow(-2), Rational.one / Rational.fromInt(9));
   });
 
   test('Decimal point', () {
