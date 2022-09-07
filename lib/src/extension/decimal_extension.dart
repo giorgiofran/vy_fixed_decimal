@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:rational/rational.dart';
 import 'package:vy_fixed_decimal/src/enums/rounding_type.dart';
+import 'package:vy_fixed_decimal/src/extension/rational_extension.dart';
 
 import '../enums/fractional_part_criteria.dart';
 import '../fixed_decimal.dart';
@@ -68,10 +69,10 @@ extension DecimalExtension on Decimal {
   Decimal safeDivBy(Decimal other, {int? scaleOnInfinitePrecision}) {
     Rational r = this / other;
     if (r.hasFinitePrecision) {
-      return r.toDecimal();
+      return r.roundToDecimal();
     }
     scaleOnInfinitePrecision ??= math.max<int>(scale, other.scale) + 10;
-    return r.toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
+    return r.roundToDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
   }
 
   static Decimal decimalFromObject(Object value, {int fractiondigits = 10}) {
@@ -90,9 +91,9 @@ extension DecimalExtension on Decimal {
       decimal = Decimal.parse(value);
     } else if (value is Rational) {
       if (value.hasFinitePrecision) {
-        decimal = value.toDecimal();
+        decimal = value.roundToDecimal();
       } else {
-        decimal = value.toDecimal(scaleOnInfinitePrecision: fractiondigits);
+        decimal = value.roundToDecimal(scaleOnInfinitePrecision: fractiondigits);
       }
     } else {
       throw Exception('Unexpected parameter type ${value.runtimeType}');
@@ -231,9 +232,9 @@ extension DecimalExtension on Decimal {
     return exponent.isNegative
         ? Decimal.one.safeDivBy(
             pow(-exponent)
-                .toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision),
+                .roundToDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision),
             scaleOnInfinitePrecision: scaleOnInfinitePrecision)
         : pow(exponent)
-            .toDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
+            .roundToDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
   }
 }

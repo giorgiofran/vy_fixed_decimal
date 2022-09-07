@@ -2,7 +2,7 @@ name: vy_fixed_decimal
 description: FixedDecimal class allows to manager numbers with a fixed decimal part length,
   while Money class allows to manage currencies.
   Both classes works on top of the Decimal one by Alexandre Ardhuin
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/giorgiofran/vy_fixed_decimal
 
 environment:
