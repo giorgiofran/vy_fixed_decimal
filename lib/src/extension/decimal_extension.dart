@@ -93,7 +93,8 @@ extension DecimalExtension on Decimal {
       if (value.hasFinitePrecision) {
         decimal = value.roundToDecimal();
       } else {
-        decimal = value.roundToDecimal(scaleOnInfinitePrecision: fractiondigits);
+        decimal =
+            value.roundToDecimal(scaleOnInfinitePrecision: fractiondigits);
       }
     } else {
       throw Exception('Unexpected parameter type ${value.runtimeType}');
@@ -231,8 +232,8 @@ extension DecimalExtension on Decimal {
     scaleOnInfinitePrecision ??= scale + 10;
     return exponent.isNegative
         ? Decimal.one.safeDivBy(
-            pow(-exponent)
-                .roundToDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision),
+            pow(-exponent).roundToDecimal(
+                scaleOnInfinitePrecision: scaleOnInfinitePrecision),
             scaleOnInfinitePrecision: scaleOnInfinitePrecision)
         : pow(exponent)
             .roundToDecimal(scaleOnInfinitePrecision: scaleOnInfinitePrecision);
