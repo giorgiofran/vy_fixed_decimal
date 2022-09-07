@@ -1,6 +1,5 @@
 # Changelog
 
-## 4.0.1
+## 1.0.0
 
-- Null-safety final
-- Made FixedDecimal.fromDecimal public
+- Initial null-safety release
