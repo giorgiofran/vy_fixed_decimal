@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 import 'package:intl/intl.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
@@ -135,7 +136,7 @@ class DecimalFormatter {
     }
 
     try {
-      decimal = Decimal.parse(wholeNumber).safeDivBy(Decimal.ten.power(scale));
+      decimal = Decimal.parse(wholeNumber).divideBy(Decimal.ten.power(scale));
       if (isNegative) {
         decimal = -decimal;
       }

@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 import 'package:intl/intl.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
@@ -191,8 +192,8 @@ class MoneyFormatter {
     }
 
     try {
-      var dec = Decimal.parse(wholeNumber)
-          .safeDivBy(Decimal.fromInt(10).power(scale));
+      var dec =
+          Decimal.parse(wholeNumber).divideBy(Decimal.fromInt(10).power(scale));
       if (isNegative) {
         dec = -dec;
       }

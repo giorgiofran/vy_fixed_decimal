@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 import 'package:test/test.dart';
 import 'package:vy_fixed_decimal/vy_fixed_decimal.dart';
@@ -43,7 +44,7 @@ void main() {
           '2.517,480');
     });
     test('formatting  ...', () {
-      final decimal = Decimal.one.safeDivBy(Decimal.parse('3'));
+      final decimal = Decimal.one.divideBy(Decimal.parse('3'));
 
       final df = DecimalFormatter('it_IT');
       expect(
@@ -123,7 +124,7 @@ void main() {
       result =
           df.formatDecimal(decimal, showGroups: false, optimizedFraction: true);
       expect(df.parse(result), decimal);
-      result = df.formatDecimal(Decimal.one.safeDivBy(Decimal.fromInt(3)),
+      result = df.formatDecimal(Decimal.one.divideBy(Decimal.fromInt(3)),
           showGroups: false, optimizedFraction: false);
       expect(df.parse(result), Decimal.parse('0.333'));
     });

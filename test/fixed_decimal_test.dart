@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
@@ -296,7 +297,7 @@ void main() {
           equals((2.5).toStringAsFixed(0))); */
       [0, 1, 23, 2.2, 2.499999, 2.5, 2.7, 1.235].forEach((num n) {
         [0, 1, 5, 10].forEach((p) {
-          print('n: $n, p: $p');
+          //print('n: $n, p: $p');
           expect(
               fixed(n.toString(), scale: p, rounding: RoundingType.halfUp)
                   .toStringAsFixed(p),

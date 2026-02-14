@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 import 'package:decimal/decimal.dart';
 import 'package:vy_fixed_decimal/src/fixed_decimal.dart';

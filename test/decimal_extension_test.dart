@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 import 'package:rational/rational.dart';
 import 'package:test/test.dart';
@@ -25,7 +26,7 @@ void main() {
 
   test('Pow Test', () {
     expect(dec('3.0').power(2), dec('9.0'));
-    expect(dec('3.0').power(-2), Decimal.one.safeDivBy(dec('9.0')));
+    expect(dec('3.0').power(-2), Decimal.one.divideBy(dec('9.0')));
     expect(dec('3.0').power(0), Decimal.one);
     expect(dec('3.0').power(12), dec('531441'));
     expect(dec('141').power(7), dec('1107984764452581'));

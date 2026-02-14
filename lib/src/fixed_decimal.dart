@@ -1,6 +1,6 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
 
-library fixed_decimal.fixed_decimal;
+library;
 
 import 'dart:collection';
 import 'dart:math';
@@ -678,7 +678,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
           /*    return DecimalExtension.minimumValueFromScale(
               min((dividend / divisor).toDecimal().scale, 10)); */
           return DecimalExtension.minimumValueFromScale(
-              min(dividend.safeDivBy(divisor).scale, 10));
+              min(dividend.divideBy(divisor).scale, 10));
         }
       }
     }
@@ -688,7 +688,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
         divisorObj,
         /*    () => (dividend / divisor)
             .toDecimal(scaleOnInfinitePrecision: scale ?? 10), */
-        () => dividend.safeDivBy(divisor),
+        () => dividend.divideBy(divisor),
         defineMinimumValue,
         minimumValue: minimumValue,
         policy: policy,
@@ -772,7 +772,7 @@ class FixedDecimal implements Comparable<FixedDecimal> {
   /// The signum function value of this [num].
   ///
   /// E.e. -1, 0 or 1 as the value of this [num] is negative, zero or positive.
-  int get signum => _decimal.signum;
+  int get signum => _decimal.sign;
 
   /// Returns the greatest integer value no greater than this [num]. */
   FixedDecimal floor() => FixedDecimal.fromDecimal(_decimal.floor(),

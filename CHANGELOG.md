@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- Updated dependencies and lints
+
 ## 1.0.2
 
 - Round instead of truncate in toDecimal()

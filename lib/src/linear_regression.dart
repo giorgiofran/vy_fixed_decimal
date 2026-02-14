@@ -15,9 +15,9 @@ class LinearRegression {
   Decimal? _deltaX2, _deltaY2, _deltaProduct;
 
   Decimal get a => _a ??= meanPoint.y - meanPoint.x * b;
-  Decimal get b => _b ??= meanDeltaProduct.safeDivBy(meanDeltaX2);
+  Decimal get b => _b ??= meanDeltaProduct.divideBy(meanDeltaX2);
   Decimal get coefficientOfDetermination => _coefficient ??=
-      meanDeltaProduct.power(2).safeDivBy(meanDeltaX2 * meanDeltaY2);
+      meanDeltaProduct.power(2).divideBy(meanDeltaX2 * meanDeltaY2);
   Decimal get meanDeltaX2 {
     if (_deltaX2 == null) {
       _deltaProduct = calculateDeltaProduct();
@@ -51,7 +51,7 @@ class LinearRegression {
       totalY += point.y;
     }
     final count = Decimal.fromInt(points.length);
-    return DecimalPoint(totalX.safeDivBy(count), totalY.safeDivBy(count));
+    return DecimalPoint(totalX.divideBy(count), totalY.divideBy(count));
   }
 
   Decimal calculateDeltaProduct() {
@@ -64,8 +64,8 @@ class LinearRegression {
       totalProduct += (p.x - meanPoint.x) * (p.y - meanPoint.y);
     }
     final count = Decimal.fromInt(points.length);
-    _deltaX2 = totalX.safeDivBy(count);
-    _deltaY2 = totalY.safeDivBy(count);
-    return totalProduct.safeDivBy(count);
+    _deltaX2 = totalX.divideBy(count);
+    _deltaY2 = totalY.divideBy(count);
+    return totalProduct.divideBy(count);
   }
 }

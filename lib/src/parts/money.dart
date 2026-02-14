@@ -1,4 +1,4 @@
-part of fixed_decimal.fixed_decimal;
+part of '../fixed_decimal.dart';
 
 class Money implements Comparable<Money> {
   late FixedDecimal _fixed;
@@ -428,7 +428,7 @@ class Money implements Comparable<Money> {
           /*      return DecimalExtension.minimumValueFromScale(
               _intMin((dividend / divisor).toDecimal().scale, 10)); */
           return DecimalExtension.minimumValueFromScale(
-              _intMin(dividend.safeDivBy(divisor).scale, 10));
+              _intMin(dividend.divideBy(divisor).scale, 10));
         }
         return divisorMin;
       } else {
@@ -446,7 +446,7 @@ class Money implements Comparable<Money> {
             _fixedDecimalWhenPossible(dividendObj),
             _fixedDecimalWhenPossible(divisorObj),
             /*    () => (dividend / divisor).toDecimal(scaleOnInfinitePrecision: 10), */
-            () => dividend.safeDivBy(divisor),
+            () => dividend.divideBy(divisor),
             defineMinimumValue,
             minimumValue: minimumValue,
             rounding: rounding),
@@ -520,7 +520,7 @@ class Money implements Comparable<Money> {
   /// The signum function value of this [num].
   ///
   /// E.e. -1, 0 or 1 as the value of this [num] is negative, zero or positive.
-  int get signum => decimal.signum;
+  int get signum => decimal.sign;
 
   /// Returns the greatest integer value no greater than this [num].
   Money floor() =>

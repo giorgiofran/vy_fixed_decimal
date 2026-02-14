@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
@@ -11,7 +12,7 @@ Money money(String value, String countryLocale, {RoundingType? rounding}) =>
 double round(double value, [double increment = 1.0]) {
   var val = Decimal.parse(value.toString());
   final inc = Decimal.parse(increment.toString());
-  val = val.safeDivBy(inc);
+  val = val.divideBy(inc);
   val = val.round();
   val *= inc;
   return val.toDouble();
@@ -93,8 +94,9 @@ void main() {
     test('compareTo(Money other)', () {
       expect(money('1', locale).compareTo(money('1', locale)), equals(0));
       expect(money('1', locale).compareTo(money('1,0', locale)), equals(0));
-      expect(money('1', locale).compareTo(money('1,1', locale)), equals(-1));
-      expect(money('1', locale).compareTo(money('0,9', locale)), equals(1));
+      expect(money('1', locale).compareTo(money('1,1', locale)), lessThan(0));
+      expect(
+          money('1', locale).compareTo(money('0,9', locale)), greaterThan(0));
     });
     test('operator +(Money other)', () {
       expect((money('1', locale) + money('1', locale)).toString(),

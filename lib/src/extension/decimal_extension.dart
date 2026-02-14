@@ -1,4 +1,5 @@
 /// Copyright © 2020 Giorgio Franceschetti. All rights reserved.
+library;
 
 import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
@@ -33,7 +34,7 @@ extension DecimalExtension on Decimal {
   /// IsNegative
   ///
   /// Returns `true` if this [Decimal] is lesser than zero.
-  bool get isNegative => signum < 0;
+  bool get isNegative => sign < 0;
 
   bool get isZero => this == Decimal.zero;
   bool get isEven => truncate() % decimal2 == Decimal.zero;
@@ -66,7 +67,7 @@ extension DecimalExtension on Decimal {
     }
   }
 
-  Decimal safeDivBy(Decimal other, {int? scaleOnInfinitePrecision}) {
+  Decimal divideBy(Decimal other, {int? scaleOnInfinitePrecision}) {
     Rational r = this / other;
     if (r.hasFinitePrecision) {
       return r.roundToDecimal();
@@ -114,7 +115,7 @@ extension DecimalExtension on Decimal {
     var decimal = checkDecimal ?? Decimal.one;
     final originalValue = decimalFromObject(objValue);
 
-    var value = originalValue.safeDivBy(decimal);
+    var value = originalValue.divideBy(decimal);
     Decimal fraPart;
     switch (locRounding) {
       case RoundingType.floor:
@@ -231,7 +232,7 @@ extension DecimalExtension on Decimal {
   Decimal power(int exponent, {int? scaleOnInfinitePrecision}) {
     scaleOnInfinitePrecision ??= scale + 10;
     return exponent.isNegative
-        ? Decimal.one.safeDivBy(
+        ? Decimal.one.divideBy(
             pow(-exponent).roundToDecimal(
                 scaleOnInfinitePrecision: scaleOnInfinitePrecision),
             scaleOnInfinitePrecision: scaleOnInfinitePrecision)
